@@ -1,0 +1,2347 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>বাইন্যান্স স্পট ড্যাশবোর্ড — হালাল (নো লিভারেজ)</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --border:#262b36; --text:#e8eaf0; --muted:#8b93a7;
+    --green:#1fbf75; --red:#ef4a5f; --amber:#e2a93a; --accent:#4f8cff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Hind Siliguri','Noto Sans Bengali',system-ui,-apple-system,sans-serif;padding:16px;}
+  h1{font-size:19px;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:16px;}
+  .badge{display:inline-block;background:#123a2a;color:var(--green);border:1px solid #1fbf7555;padding:3px 10px;border-radius:20px;font-size:12px;margin-inline-start:8px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  select,button{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:14px;}
+  button{cursor:pointer;background:var(--accent);border:none;font-weight:600;}
+  button:active{opacity:.8;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;position:relative;}
+  .removeBtn{position:absolute;top:10px;right:10px;background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:8px;padding:0;font-size:14px;line-height:1;}
+  .sym{font-weight:700;font-size:15px;padding-right:30px;}
+  .price{font-size:22px;font-weight:800;margin:6px 0 2px;}
+  .chg{font-size:13px;font-weight:700;}
+  .up{color:var(--green);} .down{color:var(--red);} .flat{color:var(--muted);}
+  .signal{margin-top:10px;padding:10px;border-radius:10px;font-size:13px;line-height:1.55;}
+  .signal.buy{background:#0f2a1e;border:1px solid #1fbf7555;}
+  .signal.sell{background:#301418;border:1px solid #ef4a5f55;}
+  .signal.hold{background:#241f10;border:1px solid #e2a93a55;}
+  .signal .label{font-weight:800;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .pct{font-size:12px;padding:2px 8px;border-radius:20px;font-weight:700;}
+  .pct.buy{background:#1fbf7522;color:var(--green);}
+  .pct.sell{background:#ef4a5f22;color:var(--red);}
+  .levels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:12px;}
+  .lv{background:#00000030;border:1px solid var(--border);border-radius:8px;padding:6px 8px;}
+  .lv .k{color:var(--muted);display:block;font-size:11px;}
+  .lv .v{font-weight:700;}
+  .rr{font-size:11px;color:var(--muted);margin-top:6px;}
+  .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:8px;}
+  footer{margin-top:20px;font-size:12px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:12px;}
+  .status{font-size:12px;color:var(--muted);margin-bottom:10px;}
+  .warn{background:#241f10;border:1px solid #e2a93a55;color:#e2a93a;padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:14px;}
+  .info{background:#0f1a2a;border:1px solid #4f8cff55;color:#9db9ef;padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:14px;}
+  h2{font-size:16px;margin:24px 0 4px;}
+  h3{font-size:13.5px;margin:16px 0 8px;color:var(--muted);}
+  .trendCard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;}
+  .trendCard.hype{border-color:#ef4a5f55;}
+  .trendCard.genuine{border-color:#1fbf7555;}
+  .trendHead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .trendSym{font-weight:800;font-size:15px;}
+  .trendVerdict{font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;}
+  .trendVerdict.hype{background:#ef4a5f22;color:var(--red);}
+  .trendVerdict.genuine{background:#1fbf7522;color:var(--green);}
+  .trendVerdict.neutral{background:#8b93a722;color:var(--muted);}
+  .trendReason{font-size:12.5px;color:var(--muted);margin:8px 0;line-height:1.55;}
+  .trendSizing{font-size:12px;font-weight:600;margin-bottom:8px;}
+  .miniBtn{font-size:12px;padding:5px 10px;border-radius:8px;}
+  .newsRow{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:11.5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .newsRow .k{color:var(--muted);}
+  .newsRow a{color:var(--accent);text-decoration:none;}
+  .newsRow a:active{opacity:.7;}
+  .bestCard{background:linear-gradient(135deg,#123a2a,#171a21);border:1px solid #1fbf7555;border-radius:14px;padding:14px;margin-bottom:10px;}
+  .bestRank{display:inline-block;background:var(--green);color:#06210f;font-weight:800;font-size:11px;padding:2px 8px;border-radius:20px;margin-bottom:6px;}
+  .bestSym{font-weight:800;font-size:16px;}
+  .bestStat{font-size:12.5px;color:var(--muted);margin-top:4px;}
+  input[type=number],input[inputmode=decimal]{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:14px;width:150px;}
+  .posSize{margin-top:10px;padding:10px;border-radius:10px;background:#0f1a2a;border:1px solid #4f8cff55;font-size:12.5px;line-height:1.6;}
+  .posSize b{color:#9db9ef;}
+  .liveNews{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;}
+  .liveNews .k{color:var(--muted);}
+  .newsList{margin:6px 0 0;padding-left:16px;}
+  .newsList li{margin-bottom:4px;}
+  .newsList a{color:var(--accent);text-decoration:none;font-size:12px;}
+  .hiddenAll{display:none !important;}
+  textarea{width:100%;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;font-family:inherit;min-height:110px;resize:vertical;}
+  .analyzeResult{margin-top:12px;padding:14px;border-radius:12px;font-size:13px;line-height:1.6;}
+  .analyzeResult.buy{background:#0f2a1e;border:1px solid #1fbf7555;}
+  .analyzeResult.sell{background:#301418;border:1px solid #ef4a5f55;}
+  .analyzeResult.hold{background:#241f10;border:1px solid #e2a93a55;}
+  .scoreRow{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .tabBtn{background:var(--card);color:var(--muted);border:1px solid var(--border);font-weight:600;}
+  .tabBtn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .buyerSeller{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:11.5px;}
+  .bsRow{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+  .bsLabel{width:58px;color:var(--muted);flex-shrink:0;}
+  .bsBar{flex:1;height:8px;border-radius:4px;overflow:hidden;display:flex;background:var(--border);}
+  .bsBuy{background:var(--green);}
+  .bsSell{background:var(--red);}
+  .bsPct{flex-shrink:0;font-size:10.5px;color:var(--muted);white-space:nowrap;}
+  .bsAmt{font-size:10.5px;color:var(--muted);margin:-2px 0 6px 58px;}
+  .orderBookBlock{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;line-height:1.6;}
+
+  .v3grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px;}
+  .v3card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;}
+  .v3score{font-size:34px;font-weight:900;}
+  .scorebar{height:8px;background:var(--border);border-radius:8px;overflow:hidden;margin:7px 0 10px;}
+  .scorefill{height:100%;background:var(--green);}
+  .v3small{font-size:12px;color:var(--muted);line-height:1.55;}
+  .v3pill{display:inline-block;padding:3px 8px;border-radius:15px;font-size:11px;font-weight:700;margin:2px;}
+  .v3bull{background:#1fbf7522;color:var(--green);}.v3bear{background:#ef4a5f22;color:var(--red);}.v3neutral{background:#e2a93a22;color:var(--amber);}
+  .v3table{width:100%;border-collapse:collapse;font-size:12px}.v3table th,.v3table td{padding:7px;border-bottom:1px solid var(--border);text-align:left}.v3table th{color:var(--muted);}
+  .v3input{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;width:120px;}
+  .v3danger{color:var(--red);font-weight:800}.v3good{color:var(--green);font-weight:800}
+  .v3chart{width:100%;height:170px;background:#00000022;border:1px solid var(--border);border-radius:10px;}
+
+  body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 15% 0%,#4f8cff12,transparent 30%),radial-gradient(circle at 85% 10%,#1fbf7510,transparent 28%);z-index:-1;}
+  body{background:linear-gradient(180deg,#0b0e13 0%,#0f1115 45%,#0b0e13 100%);}
+  h1{font-size:22px;letter-spacing:.1px;}
+  .sub{max-width:900px;}
+  .row:first-of-type{padding:10px;background:#121620cc;border:1px solid #ffffff08;border-radius:16px;backdrop-filter:blur(10px);}
+  .tabBtn{transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease;}
+  .tabBtn:hover{transform:translateY(-2px);border-color:#4f8cff88;box-shadow:0 8px 22px #00000040;}
+  .tabBtn.active{box-shadow:0 6px 20px #4f8cff35;}
+  .card,.trendCard,.bestCard,.v3card{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;}
+  .card:hover,.trendCard:hover,.bestCard:hover,.v3card:hover{transform:translateY(-3px);box-shadow:0 14px 32px #00000038;border-color:#4f8cff55;}
+  .heroEmpty{padding:34px 20px;text-align:center;border:1px dashed #4f8cff55;border-radius:18px;background:linear-gradient(135deg,#121827cc,#10131bcc);color:var(--muted);}
+  .heroEmpty .big{font-size:38px;margin-bottom:8px;}
+  .breakoutCard{background:linear-gradient(145deg,#141a24,#10141b);border:1px solid #4f8cff44;border-radius:16px;padding:16px;position:relative;overflow:hidden;}
+  .breakoutCard.strong{border-color:#1fbf7566;background:linear-gradient(145deg,#10261d,#11161b);}
+  .breakoutCard.fake{border-color:#ef4a5f66;background:linear-gradient(145deg,#29151a,#111419);}
+  .breakoutScore{font-size:38px;font-weight:900;line-height:1;}
+  .metricGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+  .metric{background:#00000025;border:1px solid #ffffff08;border-radius:10px;padding:8px;font-size:11px;color:var(--muted);}
+  .metric b{display:block;color:var(--text);font-size:14px;margin-top:2px;}
+  .reasonList{font-size:12px;line-height:1.7;color:var(--muted);margin-top:10px;}
+  .scanHero{padding:16px;border:1px solid #4f8cff33;border-radius:18px;background:radial-gradient(circle at 90% 10%,#4f8cff18,transparent 38%),linear-gradient(135deg,#121827,#0f141d);margin:12px 0;}
+  .scanControls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+  .scanBtn{font-weight:800;border:1px solid #4f8cff55!important;background:linear-gradient(135deg,#1a66ff,#4f8cff)!important;color:#fff!important;box-shadow:0 8px 24px #4f8cff25;}
+  .scanBtn.deep{background:linear-gradient(135deg,#7b3ff2,#c05cff)!important;}
+  .scanProgress{height:8px;border-radius:99px;background:#ffffff0b;overflow:hidden;margin-top:12px;}
+  .scanProgress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4f8cff,#6ef3b0);transition:width .25s ease;}
+  .scanMeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .scanChip{padding:5px 9px;border-radius:999px;background:#ffffff08;border:1px solid #ffffff0b;color:var(--muted);font-size:11px;}
+  .breakoutCard.watch{border-color:#f0b84b55;background:linear-gradient(145deg,#211b10,#111419);}
+  .breakoutCard strong{letter-spacing:.2px;}
+
+  .notifyOn{background:linear-gradient(135deg,#087f5b,#1fbf75)!important;color:#fff!important;border-color:#1fbf75!important;}
+  .notifyOff{background:var(--card)!important;color:var(--muted)!important;border:1px solid var(--border)!important;}
+  .notifyDot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#777;margin-right:5px;}
+  .notifyDot.on{background:#1fbf75;box-shadow:0 0 10px #1fbf75;}
+  @media(max-width:650px){.metricGrid{grid-template-columns:1fr 1fr}.row{gap:7px}.tabBtn{font-size:12px;padding:7px 9px}}
+</style>
+</head>
+<body>
+
+<h1>বাইন্যান্স স্পট Research & Trade Engine <span class="badge">হালাল মোড · নো লিভারেজ</span></h1>
+<div class="sub">Market → Discover → Research → Confirm → Execute → Review — evidence-based spot trading workflow।</div>
+
+<div class="row" style="margin-top:14px;">
+  <button class="tabBtn" data-tab="command">🏠 Command Center</button>
+  <button class="tabBtn" data-tab="early">🎯 Early Opportunity</button>
+  <button class="tabBtn" data-tab="main">কয়েন লিস্ট</button>
+  <button class="tabBtn" data-tab="trend">ট্রেন্ডিং</button>
+  <button class="tabBtn" data-tab="rsi">RSI</button>
+  <button class="tabBtn" data-tab="mtf">মাল্টি-টাইমফ্রেম</button>
+  <button class="tabBtn" data-tab="fast">⚡ দ্রুত মুভার</button>
+  <button class="tabBtn" data-tab="calc">🧮 ক্যালকুলেটর</button>
+  <button class="tabBtn" data-tab="best">🏆 সেরা সুযোগ</button>
+  <button class="tabBtn" data-tab="catalyst">🧨 ক্যাটালিস্ট</button>
+  <button class="tabBtn" data-tab="fundamental">🔬 ফান্ডামেন্টাল</button>
+  <button class="tabBtn" data-tab="scanner">🎯 স্ক্যানার</button>
+  <button class="tabBtn" data-tab="flow">🐋 ফ্লো</button>
+  <button class="tabBtn" data-tab="breakout">🚨 ব্রেকআউট</button>
+  <button class="tabBtn" data-tab="regime">🧠 মার্কেট রেজিম</button>
+  <button class="tabBtn" data-tab="journal">📓 জার্নাল</button>
+  <button class="tabBtn" data-tab="backtest">🧪 ব্যাকটেস্ট</button>
+  <button class="tabBtn" data-tab="futures">📈 Futures Intel</button>
+</div>
+
+<div id="tabPane-command" class="tabPane">
+  <div class="scanHero">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div><b style="font-size:20px">🏠 Trading Command Center</b><div class="v3small" style="margin-top:4px">Market → Discover → Verify → Confirm → Execute. এখানে প্রথমে market condition, তারপর সবচেয়ে promising technical candidates দেখা যাবে।</div></div>
+      <button id="commandRefreshBtn" class="scanBtn">↻ পুরো Market Scan</button>
+    </div>
+    <div id="commandRegime" class="v3grid" style="margin-top:12px"></div>
+    <div class="scanMeta" style="margin-top:10px"><span class="scanChip" id="commandUpdated">Last scan: —</span><span class="scanChip" id="commandUniverse">Universe: —</span><span class="scanChip" id="commandStatus">Status: —</span></div>
+  </div>
+
+  <div class="v3card" style="margin-top:12px">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><b style="font-size:16px">🎯 Top Discovery Candidates</b><div class="v3small">এগুলো trade signal নয়। Trend, momentum, volume, liquidity ও BTC-relative strength দিয়ে shortlist করা হয়েছে।</div></div><select id="commandCount"><option>5</option><option selected>8</option><option>12</option></select></div>
+    <div id="commandCandidates" class="v3grid" style="margin-top:10px"></div>
+  </div>
+
+  <div class="v3grid" style="margin-top:12px">
+    <div class="v3card"><b>🔬 Research</b><p class="v3small">Candidate পছন্দ হলে Fundamental ও Catalyst দিয়ে কারণ যাচাই করুন।</p><div class="row"><button class="miniBtn" data-jump="fundamental">Fundamental</button><button class="miniBtn" data-jump="catalyst">Catalyst</button></div></div>
+    <div class="v3card"><b>🎯 Confirm</b><p class="v3small">তারপর Breakout, Flow ও Multi-timeframe confirmation দেখুন।</p><div class="row"><button class="miniBtn" data-jump="breakout">Breakout</button><button class="miniBtn" data-jump="flow">Flow</button><button class="miniBtn" data-jump="mtf">MTF</button></div></div>
+    <div class="v3card"><b>💰 Execute</b><p class="v3small">Setup পাওয়া গেলে Entry, SL, TP ও position size ঠিক করুন।</p><div class="row"><button class="miniBtn" data-jump="scanner">Setup Scanner</button><button class="miniBtn" data-jump="calc">Risk Calculator</button></div></div>
+  </div>
+  <div class="warn" style="margin-top:12px">⚠️ Discovery score কোনো ভবিষ্যৎ দামের prediction নয়। Fundamental, catalyst, market regime ও execution risk আলাদা করে যাচাই না করে শুধু এই score দেখে trade নেবেন না।</div>
+
+</div>
+
+<div id="tabPane-early" class="tabPane hiddenAll">
+  <h2>🎯 Early Opportunity</h2>
+  <div class="sub">Breakout-এর আগে clean setup খোঁজা হবে — Higher Low, price compression, volume build, BTC-relative strength, resistance proximity, healthy RSI এবং market-regime compatibility একসাথে যাচাই করে। বড় pump হয়ে গেলে বা setup অসম্পূর্ণ হলে candidate বাদ যাবে।</div>
+  <div class="scanHero">
+    <b style="font-size:16px">🔎 Pre-Breakout Opportunity Hunt</b>
+    <div class="v3small" style="margin-top:5px">লক্ষ্য: “এখনই breakout” নয় — breakout-এর আগে শক্তি জমা হচ্ছে কি না সেটা খুঁজে বের করা। এটি trade signal নয়; clean setup না থাকলে কোনো coin দেখানো হবে না।</div>
+    <div class="scanControls">
+      <button id="earlyBtn" class="scanBtn">🎯 Scan Early Opportunities</button>
+      <select id="earlyCount"><option value="5">Top 5</option><option value="8" selected>Top 8</option><option value="12">Top 12</option></select>
+      <select id="earlyMin"><option value="65">Score ≥65</option><option value="70" selected>Score ≥70</option><option value="75">Score ≥75</option></select>
+    </div>
+    <div class="scanControls" style="margin-top:9px">
+      <button id="earlyNotifyBtn" class="notifyOff">🔕 Alerts OFF</button>
+      <button id="earlyTestNotifyBtn" class="miniBtn">🔔 Test Notification</button>
+      <select id="earlyInterval" title="Automatic scan interval">
+        <option value="5">Auto scan: 5 min</option>
+        <option value="10" selected>Auto scan: 10 min</option>
+        <option value="15">Auto scan: 15 min</option>
+      </select>
+      <span class="scanChip"><span id="earlyNotifyDot" class="notifyDot"></span><span id="earlyNotifyStatus">Browser alert বন্ধ</span></span>
+    </div>
+    <div id="earlyNotifyHelp" class="v3small" style="margin-top:8px;">🔔 Notification চালাতে dashboard-টি HTTPS website হিসেবে খুলতে হবে (যেমন GitHub Pages)। ফোনে local <code>content://</code> file হিসেবে খুললে Chrome notification permission দেয় না।</div>
+    <div class="scanProgress"><i id="earlyProgress"></i></div>
+    <div class="scanMeta">
+      <span class="scanChip" id="earlyUniverse">Universe: —</span>
+      <span class="scanChip" id="earlyScanned">Scanned: 0</span>
+      <span class="scanChip" id="earlyUpdated">Last scan: —</span>
+      <span class="scanChip" id="earlyStatus">Status: —</span>
+    </div>
+  </div>
+  <div id="earlyMarket" class="v3grid"></div>
+  <div id="earlyGrid" class="v3grid" style="margin-top:12px"></div>
+  <div id="earlyEmpty" class="heroEmpty hiddenAll" style="margin-top:12px">
+    <div class="big">🧹</div>
+    <b>আজ clean Early Opportunity পাওয়া যায়নি</b>
+    <div class="v3small" style="margin-top:6px">এটা ইচ্ছাকৃত। Higher Low + compression + volume build + BTC strength + resistance proximity + healthy RSI — সবগুলো যথেষ্ট পরিষ্কার না হলে coin দেখানো হবে না।</div>
+  </div>
+  <div class="warn" style="margin-top:12px">⚠️ Early Opportunity score ভবিষ্যৎ দাম predict করে না। Resistance-এর ঠিক আগে setup clean হলেও breakout নিশ্চিত নয়। Catalyst, Fundamental, Breakout/Flow ও risk management দিয়ে পরে confirm করতে হবে।</div>
+</div>
+
+<div id="tabPane-main" class="tabPane">
+  <div id="fngWidget" class="info" style="display:none;"></div>
+  <div class="row">
+    <select id="coinSelect" multiple size="6" style="min-width:200px;"></select>
+    <button id="addBtn">যোগ করুন</button>
+    <button id="refreshBtn">রিফ্রেশ</button>
+    <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" id="autoRefresh"> অটো-রিফ্রেশ (৬০ সে.) <button id="reloadMarketBtn" class="miniBtn">↻ Market Reload</button>
+    </label>
+  </div>
+  <div class="status" id="status">কোনো কয়েন নির্বাচিত নেই — উপরের তালিকা থেকে কয়েন বেছে “যোগ করুন” চাপুন।</div>
+
+  <div class="sub" style="margin-top:14px;">💰 নিচে আপনার মোট পুঁজি ও এই ট্রেডে সর্বোচ্চ কত লস মেনে নিতে পারবেন তা দিন — প্রতিটা কয়েনের কার্ডে সেই কয়েনের নিজস্ব এন্ট্রি/স্টপ-লস অনুযায়ী হিসাব করে বলে দিবে কত টাকার কিনতে পারবেন।</div>
+  <div class="row">
+    <input id="capitalInput" type="text" inputmode="decimal" placeholder="মোট পুঁজি" style="width:130px;">
+    <input id="maxLossInput" type="text" inputmode="decimal" placeholder="সর্বোচ্চ লস" style="width:130px;">
+    <select id="riskCurrency">
+      <option value="BDT">৳ BDT</option>
+      <option value="USDT">$ USDT</option>
+    </select>
+    <span style="font-size:11.5px;color:var(--muted);">রেট: ১ USDT = <input id="fxRateInput" type="text" inputmode="decimal" style="width:70px;padding:4px 6px;" value="122"> ৳</span>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="tabPane-trend" class="tabPane hiddenAll">
+  <div class="sub">২৪ ঘণ্টার ভলিউম ও দাম পরিবর্তন দিয়ে সবচেয়ে বেশি আলোচিত কয়েনগুলো, সাথে ভলিউম-স্পাইক বিশ্লেষণ করে যাচাই — এটা আসল ট্রেন্ড নাকি সাময়িক পাম্প/গুজব।</div>
+  <div class="row">
+    <button id="trendRefreshBtn">রিফ্রেশ</button>
+    <select id="trendDetailSelect"><option value="">— বিস্তারিত দেখতে কয়েন বাছুন —</option></select>
+    <button id="trendDetailClear">✕ বন্ধ করুন</button>
+  </div>
+  <div id="trendDetail"></div>
+  <div class="status" id="trendStatus"></div>
+  <div class="grid" id="trendGrid"></div>
+</div>
+
+<div id="tabPane-rsi" class="tabPane hiddenAll">
+  <div class="sub">RSI অনুযায়ী তিনটা ভাগে কয়েন দেখায় — কতক্ষণ ধরে সেই RSI জোনে আছে সেটাও পাশে দেখাবে (১ ঘণ্টার ক্যান্ডেল হিসেবে)।</div>
+  <div class="row"><button id="rsiRefreshBtn">রিফ্রেশ</button></div>
+  <div class="status" id="rsiStatus"></div>
+  <div id="rsiZones">
+    <h3>🔴 ওভারসোল্ড (RSI ≤ 30)</h3>
+    <div class="grid" id="rsiOversold"></div>
+    <h3>🟡 নিরপেক্ষ (RSI ৪৫–৫৫, ~৫০)</h3>
+    <div class="grid" id="rsiNeutral"></div>
+    <h3>🟢 ওভারবট (RSI ≥ 70)</h3>
+    <div class="grid" id="rsiOverbought"></div>
+  </div>
+</div>
+
+<div id="tabPane-mtf" class="tabPane hiddenAll">
+  <div class="sub">১ ঘণ্টা, ৪ ঘণ্টা ও ১ দিনের টাইমফ্রেম একসাথে মিলিয়ে, RSI ডাইভারজেন্স যাচাই করে — কোন কোন কয়েনে দাম বাড়ার সম্ভাবনা তুলনামূলক বেশি তা দেখায়, আনুমানিক সময়সীমাসহ।</div>
+  <div class="warn">⚠️ এই "সময়সীমা" কোনো নিশ্চিত ভবিষ্যদ্বাণী না — শুধু কোন টাইমফ্রেমে সিগন্যাল শক্তিশালী তার উপর ভিত্তি করে একটা মোটামুটি ধারণা। ডাইভারজেন্স হিসাবও সরলীকৃত (দুইটা সাম্প্রতিক লো পয়েন্ট তুলনা করে) — পেশাদার চার্টিং টুলের নিখুঁত পিভট-বেসড পদ্ধতি না।</div>
+  <div class="row"><button id="mtfRefreshBtn">রিফ্রেশ</button></div>
+  <div class="status" id="mtfStatus"></div>
+  <div class="grid" id="mtfGrid"></div>
+</div>
+
+<div id="tabPane-fast" class="tabPane hiddenAll">
+  <div class="sub">গত ৫, ১০ ও ১৫ মিনিটে কোন কয়েনের দাম সবচেয়ে দ্রুত উঠছে বা নামছে। (বাইন্যান্সে ১০ মিনিটের ক্যান্ডেল নেই, তাই ১-মিনিটের ডাটা থেকে ঠিক ৫/১০/১৫ মিনিট আগের দামের সাথে তুলনা করা হয়।)</div>
+  <div class="row"><button id="fastRefreshBtn">রিফ্রেশ</button></div>
+  <div class="status" id="fastStatus"></div>
+  <h3>🚀 দ্রুত বাড়ছে</h3>
+  <div class="grid" id="fastUp"></div>
+  <h3>📉 দ্রুত কমছে</h3>
+  <div class="grid" id="fastDown"></div>
+</div>
+
+<div id="tabPane-calc" class="tabPane hiddenAll">
+  <div class="sub">কত দামে কিনবেন, স্টপ-লস (SL) ও টেক-প্রফিট (TP) কত — দিলে বলে দিবে লাভ/ক্ষতি কত টাকা (BDT) হবে এবং R:R কত।</div>
+  <div class="row">
+    <input id="calcBuy" type="text" inputmode="decimal" placeholder="বাই প্রাইস (USDT)" style="width:150px;">
+    <input id="calcSL" type="text" inputmode="decimal" placeholder="SL প্রাইস" style="width:110px;">
+    <input id="calcTP" type="text" inputmode="decimal" placeholder="TP প্রাইস" style="width:110px;">
+  </div>
+  <div class="row">
+    <input id="calcInvest" type="text" inputmode="decimal" placeholder="বিনিয়োগের পরিমাণ" style="width:150px;">
+    <select id="calcCur">
+      <option value="BDT">৳ BDT</option>
+      <option value="USDT">$ USDT</option>
+    </select>
+    <button id="calcBtn">হিসাব করুন</button>
+  </div>
+  <div id="calcOutput"></div>
+</div>
+
+<div id="tabPane-best" class="tabPane hiddenAll">
+  <div class="sub">Binance-এর liquid USDT Spot market থেকে নিজে থেকে সেরা candidates বেছে ১দিন, ১২ঘ, ৪ঘ, ১ঘ, ৩০মি — এই ৫টা টাইমফ্রেম (+২ দিনের আনুমানিক পরিবর্তন) মিলিয়ে প্রতিটা কয়েনের নিজস্ব সাপোর্ট/রেজিস্ট্যান্স বের করে, যেসব লেভেল একাধিক টাইমফ্রেমে মিলে যায় (কনফ্লুয়েন্স) সেটাকে বেশি নির্ভরযোগ্য ধরে টার্গেট/স্টপ-লস ঠিক করা হয়, সাথে বায়ার/সেলার অনুপাতও দেখা হয়। এটা ভারী হিসাব তাই ম্যানুয়ালি চালাতে হবে।</div>
+  <div class="warn">⚠️ এটা এখনও প্রযুক্তিগত (দাম/ভলিউম-ভিত্তিক) বিশ্লেষণ — কোনো গাণিতিক পদ্ধতিই ভবিষ্যতের দাম নিশ্চিতভাবে বলতে পারে না। "সবচেয়ে একুরেট" মানে একাধিক টাইমফ্রেমের সম্মতি (কনফ্লুয়েন্স), নিশ্চয়তা না।</div>
+  <div class="row"><button id="bestPickBtn">বিশ্লেষণ করুন</button></div>
+  <div class="status" id="bestPickStatus"></div>
+  <div id="bestPick"></div>
+</div>
+
+<div id="tabPane-catalyst" class="tabPane hiddenAll">
+  <div class="sub">Binance-এর liquid USDT Spot market-এর নির্বাচিত high-volume coins-এর সাম্প্রতিক খবর যাচাই করে সম্ভাব্য ক্যাটালিস্ট (লিস্টিং, ইটিএফ/প্রাতিষ্ঠানিক, নেটওয়ার্ক আপগ্রেড, পার্টনারশিপ, টোকেনোমিক্স ইভেন্ট, রেগুলেটরি ঝুঁকি) খুঁজে বের করে — সারমর্ম, সম্ভাব্য প্রভাব ও আনুমানিক সময়কালসহ।</div>
+  <div class="info">🔬 <b>Deep Catalyst Engine:</b> খবরের freshness, একাধিক source-এর agreement, official/major-source weighting, event direction, price-volume confirmation এবং contradiction/risk মিলিয়ে score করবে। শুধু keyword match হলে সেটাকে “confirmed” বলা হবে না।</div>
+  <div class="row">
+    <button id="catalystBtn" class="scanBtn">🧨 Auto Catalyst Scan</button>
+    <select id="catalystWindow"><option value="6">শেষ ৬ ঘণ্টা</option><option value="24" selected>শেষ ২৪ ঘণ্টা</option><option value="72">শেষ ৩ দিন</option></select>
+    <select id="catalystMin"><option value="45">Score ≥45</option><option value="60" selected>Score ≥60</option><option value="75">Score ≥75</option></select>
+    <button id="catalystRetry" class="miniBtn">↻ Reload</button>
+  </div>
+  <div class="scanProgress"><i id="catalystProgress"></i></div>
+  <div class="scanMeta"><span class="scanChip" id="catalystUniverse">Universe: —</span><span class="scanChip" id="catalystScanned">Scanned: 0</span><span class="scanChip" id="catalystUpdated">Last scan: —</span></div>
+  <div class="status" id="catalystStatus">Auto scan শুরু হচ্ছে…</div>
+  <div class="grid" id="catalystGrid"></div>
+</div>
+
+
+<div id="tabPane-fundamental" class="tabPane hiddenAll">
+<h2>🔬 Fundamental Scanner</h2>
+<div class="sub">কোনো coin আগে যোগ করার দরকার নেই। Binance-এর liquid USDT Spot market থেকে নিজে candidate বেছে নিয়ে public fundamental/market data দিয়ে project quality, tokenomics, liquidity ও risk-এর একটি rule-based score তৈরি করবে।</div>
+<div class="scanHero">
+  <b style="font-size:16px">🧬 Auto Fundamental Research</b>
+  <div class="v3small" style="margin-top:5px">Coin List শুধু আপনার personal watchlist। এই scanner আলাদা করে market থেকে coin বেছে নেবে। CoinGecko-এর public market/metadata data ব্যবহার করে score করবে; active users/transactions-এর মতো সব on-chain metric এখানে সরাসরি যাচাই করা হয় না।</div>
+  <div class="scanControls">
+    <button id="fundamentalBtn" class="scanBtn">🔬 Auto Fundamental Scan</button>
+    <select id="fundamentalCoinSelect" style="min-width:150px"><option value="">কয়েন বেছে নিন…</option></select>
+    <input id="fundamentalCoinInput" type="text" placeholder="অথবা BTC/USDT লিখুন" style="min-width:150px">
+    <button id="fundamentalAddBtn" class="miniBtn">🔬 এই Coin-এর Fundamental যাচাই</button>
+    <select id="fundamentalCount"><option value="8">Top 8</option><option value="12" selected>Top 12</option><option value="20">Top 20</option></select>
+    <select id="fundamentalMin"><option value="50">Score ≥50</option><option value="60" selected>Score ≥60</option><option value="70">Score ≥70</option></select>
+  </div>
+  <div class="scanProgress"><i id="fundamentalProgress"></i></div>
+  <div class="scanMeta"><span class="scanChip" id="fundamentalUniverse">Universe: —</span><span class="scanChip" id="fundamentalScanned">Analyzed: 0</span><span class="scanChip" id="fundamentalUpdated">Last scan: —</span></div>
+</div>
+<div class="warn">⚠️ Fundamental score কোনো buy signal নয়। Token unlock, treasury, governance, developer activity, real usage এবং project-specific risks সবসময় official docs ও primary sources দিয়ে আলাদা করে যাচাই করা উচিত।</div>
+<div id="fundamentalStatus" class="status">Auto Fundamental Scan চাপলে market-wide research শুরু হবে।</div>
+<div id="fundamentalManual" class="v3grid"></div>
+<div id="fundamentalGrid" class="v3grid"></div>
+</div>
+
+
+<div id="tabPane-scanner" class="tabPane hiddenAll">
+<h2>🎯 Trade Setup Scanner</h2><div class="sub">একাধিক confirmation একসাথে নিয়ে 100-এর মধ্যে setup score। Score prediction নয়; evidence aggregation।</div>
+<div class="row"><button id="scannerBtn">স্ক্যান করুন</button><select id="scannerMin"><option value="60">≥60</option><option value="70" selected>≥70</option><option value="80">≥80</option></select></div><div id="scannerStatus" class="status"></div><div id="scannerGrid" class="v3grid"></div>
+</div>
+<div id="tabPane-flow" class="tabPane hiddenAll">
+<h2>🐋 Flow & Breakout Lab</h2><div class="sub">কোনো coin যোগ না করেই Binance-এর liquid USDT Spot market থেকে aggressive buyer/seller flow ও order-book imbalance-এর সেরা সেটআপগুলো নিজে থেকে খুঁজবে।</div>
+<div class="row"><button id="flowBtn">🐋 Auto Flow Scan</button><select id="flowLimit"><option value="10">Top 10</option><option value="20" selected>Top 20</option><option value="40">Top 40</option></select></div><div class="status" id="flowStatus">Auto Flow Scan চাপলে market-wide scan শুরু হবে।</div><div id="flowOut"></div>
+</div>
+<div id="tabPane-breakout" class="tabPane hiddenAll">
+<h2>🚨 Breakout Scanner</h2>
+<div class="sub">এটা Watchlist Scanner নয় — Binance-এর যোগ্য USDT Spot market নিজে থেকে স্ক্যান করবে। এখানে কোনো coin আগে “যোগ” করার দরকার নেই।</div>
+<div class="scanHero">
+  <b style="font-size:16px">⚡ Market-wide Breakout Hunt</b>
+  <div class="v3small" style="margin-top:5px">প্রথমে Quick Scan দিয়ে liquid market-এর দ্রুত scan করো। দরকার হলে Deep Scan দিয়ে আরও বেশি pair যাচাই করো। Top setup-গুলোর order-book snapshot পরে যাচাই করা হবে।</div>
+  <div class="scanControls">
+    <button id="breakoutBtn" class="scanBtn">⚡ Quick Scan</button>
+    <button id="breakoutDeepBtn" class="scanBtn deep">🔬 Deep Scan</button>
+    <select id="breakoutTf"><option value="15m" selected>15 মিনিট</option><option value="1h">1 ঘণ্টা</option><option value="4h">4 ঘণ্টা</option></select>
+    <select id="breakoutMin"><option value="55">Score ≥55</option><option value="65" selected>Score ≥65</option><option value="75">Score ≥75</option></select>
+    <select id="breakoutMode"><option value="all" selected>সব setup</option><option value="strong">শুধু Real Breakout</option><option value="fake">Fake-risk সহ</option></select>
+  </div>
+  <div class="scanProgress"><i id="breakoutProgress"></i></div>
+  <div class="scanMeta"><span class="scanChip" id="breakoutUniverse">Universe: —</span><span class="scanChip" id="breakoutScanned">Scanned: 0</span><span class="scanChip" id="breakoutUpdated">Last scan: —</span></div>
+</div>
+<div class="warn">⚠️ Breakout score কোনো নিশ্চয়তা নয়। শেষ candle close, volume expansion, buyer pressure ও retest নিজে যাচাই করো। Order-book snapshot spoof হতে পারে।</div>
+<div id="breakoutStatus" class="status">Quick Scan চাপলে market-wide scan শুরু হবে।</div>
+<div id="breakoutGrid" class="v3grid"></div>
+</div>
+<div id="tabPane-regime" class="tabPane hiddenAll">
+<h2>🧠 Market Regime</h2><div class="sub">BTC/ETH trend, volatility ও breadth থেকে বর্তমান market regime-এর একটি rule-based estimate।</div>
+<div class="row"><button id="regimeBtn">রেজিম বিশ্লেষণ</button></div><div id="regimeOut"></div>
+</div>
+<div id="tabPane-journal" class="tabPane hiddenAll">
+<h2>📓 Trade Journal</h2><div class="sub">Browser localStorage-এ journal থাকবে; কোনো API key লাগে না।</div>
+<div class="row"><input id="jCoin" class="v3input" placeholder="BTCUSDT"><input id="jEntry" class="v3input" placeholder="Entry"><input id="jSL" class="v3input" placeholder="SL"><input id="jTP" class="v3input" placeholder="TP"><input id="jRisk" class="v3input" placeholder="Risk %"><button id="jAdd">Save trade</button></div><div id="journalOut"></div>
+</div>
+<div id="tabPane-backtest" class="tabPane hiddenAll">
+<h2>🧪 Rule Backtester</h2><div class="sub">কোনো coin যোগ করার দরকার নেই। Binance-এর liquid USDT Spot market থেকে Top pairs নিয়ে একই MA25 + RSI rule-এর historical baseline test চালাবে।</div>
+<div class="row"><select id="btTf"><option value="1h">1H</option><option value="4h">4H</option><option value="15m">15M</option></select><select id="btCount"><option value="5">Top 5</option><option value="10" selected>Top 10</option><option value="20">Top 20</option></select><input id="btLimit" class="v3input" value="500" placeholder="Candles"><button id="btBtn">Auto Backtest</button></div><div id="btOut"></div>
+</div>
+<div id="tabPane-futures" class="tabPane hiddenAll">
+<h2>📈 Futures Intelligence <span class="badge">অতিরিক্ত তথ্য · Spot signal নয়</span></h2>
+<div class="sub">এটি Spot-এর মূল analysis-এর বাইরে একটি optional Futures market context panel। Funding, Open Interest, long/short positioning এবং futures-vs-spot basis দেখে leverage market-এর চাপ বোঝাবে। এই data Spot Confluence Score-এ automaticভাবে যোগ করা হবে না।</div>
+<div class="scanHero">
+  <div class="scanControls">
+    <select id="futuresCoinSelect" style="min-width:170px"><option value="BTCUSDT">BTCUSDT</option></select>
+    <input id="futuresCoinInput" type="text" placeholder="অথবা BTC/USDT লিখুন" style="min-width:170px">
+    <button id="futuresAnalyzeBtn" class="scanBtn">📊 Futures বিশ্লেষণ</button>
+    <button id="futuresReloadBtn" class="miniBtn">↻ Coin list reload</button>
+  </div>
+  <div class="scanMeta"><span class="scanChip" id="futuresUpdated">Last check: —</span><span class="scanChip" id="futuresStatus">Status: —</span></div>
+</div>
+<div id="futuresOut" style="margin-top:12px"></div>
+<div class="warn" style="margin-top:12px">⚠️ Futures data leverage traders-এর positioning বোঝার জন্য। Funding/OI/Long-Short ratio একা price direction নিশ্চিত করে না। Spot trade নেওয়ার ক্ষেত্রে এটাকে secondary context হিসেবে দেখুন।</div>
+</div>
+
+<footer>
+  <b>সংবাদ/অর্থনীতির সোর্স:</b>
+  <a href="https://www.coindesk.com/" target="_blank" style="color:var(--accent);">CoinDesk</a> ·
+  <a href="https://cointelegraph.com/" target="_blank" style="color:var(--accent);">CoinTelegraph</a> ·
+  <a href="https://www.forexfactory.com/calendar" target="_blank" style="color:var(--accent);">অর্থনৈতিক ক্যালেন্ডার</a><br><br>
+  <b>বাইন্যান্স ফিড / বিশ্লেষক মতামত (নিজে যাচাই করুন):</b>
+  <a href="https://www.binance.com/en/square" target="_blank" style="color:var(--accent);">Binance Square</a> ·
+  <a href="https://www.binance.com/en/square/creators" target="_blank" style="color:var(--accent);">টপ ক্রিয়েটর লিস্ট</a><br><br>
+  <b>সিগন্যাল লজিক:</b> মূল্য MA25-এর উপরে + RSI ৭০-এর নিচে → বাই জোন। মূল্য MA25-এর নিচে + RSI দুর্বল → সেল/সতর্কতা জোন। "সম্ভাব্য লাভ%" হলো সাম্প্রতিক ৫০ ঘণ্টার সর্বোচ্চ (রেজিস্ট্যান্স) পর্যন্ত দূরত্ব, আর স্টপ-লস হলো সাম্প্রতিক সর্বনিম্নের (সাপোর্ট) কাছাকাছি — এগুলো শুধু প্রযুক্তিগত রেফারেন্স, নিশ্চিত ফলাফল নয়।<br><br>
+  স্পট = মালিকানায় কেনা, ধারে (leverage) নয়। "সেল" সিগন্যাল মানে আপনার ইতিমধ্যে থাকা হোল্ডিং বিক্রির কথা বিবেচনা — শর্ট সেলিং এখানে প্রযোজ্য নয়।<br><br>
+  <b>ট্রেন্ড যাচাই (গুজব বনাম প্রকৃত):</b> স্বল্প সময়ে ভলিউম অস্বাভাবিক বেড়ে গিয়ে RSI অতিরিক্ত ওভারবট হলে সেটাকে সম্ভাব্য "পাম্প/হাইপ" ধরা হয়েছে; ভলিউম স্বাভাবিকভাবে বাড়া + স্থিতিশীল আপট্রেন্ড মিলিয়ে "প্রকৃত ট্রেন্ড" বলা হয়েছে। এটা নিছক ভলিউম-প্রাইস প্যাটার্ন বিশ্লেষণ — কোম্পানি/প্রজেক্টের মৌলিক (fundamental) ভ্যালু যাচাই নয়, তাই চূড়ান্ত সিদ্ধান্তের আগে প্রজেক্টের নিজস্ব খবর ও তথ্য যাচাই করে নিন।
+</footer>
+
+<script>
+const DEFAULT_SYMBOLS = [];
+let watch = [];
+const grid = document.getElementById('grid');
+const statusEl = document.getElementById('status');
+const select = document.getElementById('coinSelect');
+
+function fillCoinOptions(symbols){
+  select.innerHTML = '';
+  symbols.forEach(s=>{
+    const o1=document.createElement('option'); o1.value=s; o1.textContent=s; select.appendChild(o1);
+  });
+}
+
+// Watchlist is intentionally empty at startup. The main tab only shows coins after the user adds them.
+function commandCard(x){
+ const cls=x.score>=80?'genuine':x.score>=65?'hype':'hold';
+ const rel=x.rel>=0?`+${x.rel.toFixed(2)}%`:`${x.rel.toFixed(2)}%`;
+ return `<div class="v3card ${cls}">
+  <div class="trendHead"><span class="trendSym">${esc(x.symbol)}</span><span class="trendVerdict ${cls}">${Math.round(x.score)}/100</span></div>
+  <div class="chg ${x.change>=0?'up':'down'}" style="margin-top:4px">$${x.price.toPrecision(7)} · ${x.change>=0?'+':''}${x.change.toFixed(2)}%</div>
+  <div class="v3small" style="margin-top:8px">Trend: <b>${x.trend}</b> · RSI: <b>${x.rsi.toFixed(1)}</b><br>Volume ratio: <b>${x.volRatio.toFixed(1)}x</b> · vs BTC: <b>${rel}</b></div>
+  <div class="row" style="margin-top:9px"><button class="miniBtn commandResearch" data-symbol="${esc(x.symbol)}" data-jump="fundamental">🔬 Fundamental</button><button class="miniBtn commandResearch" data-symbol="${esc(x.symbol)}" data-jump="breakout">🚨 Breakout</button></div>
+ </div>`;
+}
+async function runCommandCenter(){
+ const reg=document.getElementById('commandRegime'), out=document.getElementById('commandCandidates'), st=document.getElementById('commandStatus'), uni=document.getElementById('commandUniverse');
+ reg.innerHTML='<div class="info">Market regime ও liquid market candidates হিসাব করা হচ্ছে…</div>'; out.innerHTML=''; st.textContent='Scanning…';
+ try{
+  const all=await fetchAllTickers();
+  const btcTicker=all.find(t=>t.symbol==='BTCUSDT');
+  const uniList=all.filter(t=>t.symbol.endsWith('USDT')&&!STABLE_OR_LEVERAGED.test(t.symbol)&&Number(t.quoteVolume)>5000000).sort((a,b)=>Number(b.quoteVolume)-Number(a.quoteVolume)).slice(0,30);
+  const btc=await fetchKlines('BTCUSDT','4h',60); const bcl=btc.map(c=>c.close), bm7=sma(bcl,7), bm25=sma(bcl,25), brsi=rsi(bcl,14);
+  const bull=bm7>bm25&&bcl.at(-1)>bm25&&brsi<72, bear=bm7<bm25&&bcl.at(-1)<bm25;
+  const regime=bull?'🟢 Risk-on / Bullish':bear?'🔴 Risk-off / Bearish':'🟡 Mixed / Range';
+  reg.innerHTML=`<div class="v3card"><b>Market Regime</b><div style="font-size:20px;margin-top:5px">${regime}</div><div class="v3small">BTC 4H · RSI ${brsi.toFixed(1)} · price ${bcl.at(-1)>bm25?'above':'below'} MA25</div></div><div class="v3card"><b>BTC 24h</b><div style="font-size:20px;margin-top:5px">${Number(btcTicker?.priceChangePercent||0)>=0?'+':''}${Number(btcTicker?.priceChangePercent||0).toFixed(2)}%</div><div class="v3small">BTC is the first market filter for altcoin setups.</div></div><div class="v3card"><b>Trading Bias</b><div style="font-size:20px;margin-top:5px">${bull?'Breakout / momentum preferred':bear?'Defensive / fewer longs':'Selective setups only'}</div><div class="v3small">এটা standalone buy/sell signal নয়।</div></div>`;
+  uni.textContent=`Universe: ${uniList.length}`;
+  const results=await mapWithConcurrency(uniList,5,async t=>{try{
+   const c=await fetchKlines(t.symbol,'1h',60),cl=c.map(x=>x.close), vols=c.map(x=>x.volume), rr=rsi(cl,14), m7=sma(cl,7),m25=sma(cl,25);
+   const recent=vols.slice(-5).reduce((a,b)=>a+b,0)/5, prior=vols.slice(-30,-5).reduce((a,b)=>a+b,0)/25, vr=prior>0?recent/prior:1;
+   const trend=m7>m25?'Bullish':m7<m25?'Bearish':'Flat';
+   const ch=Number(t.priceChangePercent||0); const rel=ch-Number(btcTicker?.priceChangePercent||0);
+   let score=50; score+=trend==='Bullish'?15:trend==='Bearish'?-12:0; score+=rr>=45&&rr<=68?12:rr<35?5:rr>75?-10:0; score+=Math.min(15,Math.max(-5,(vr-1)*8)); score+=Math.max(-8,Math.min(12,rel*1.5)); score+=ch>0?Math.min(6,ch*.8):Math.max(-6,ch*.8); score+=Number(t.quoteVolume)>50000000?5:0;
+   return {symbol:t.symbol,price:Number(t.lastPrice),change:ch,rsi:rr,volRatio:vr,trend,rel,score:Math.max(0,Math.min(100,score))};
+  }catch(e){return null;}});
+  results.sort((a,b)=>b.score-a.score); const n=Number(document.getElementById('commandCount').value||8); out.innerHTML=results.filter(Boolean).slice(0,n).map(commandCard).join('')||'<div class="warn">Candidate পাওয়া যায়নি।</div>';
+  st.textContent='Ready'; document.getElementById('commandUpdated').textContent='Last scan: '+new Date().toLocaleTimeString('bn-BD');
+ }catch(e){console.error(e);reg.innerHTML='<div class="warn">Command Center data পাওয়া যায়নি। Internet/API connection যাচাই করুন।</div>';st.textContent='Failed';}
+}
+
+async function loadCoinList(){
+  select.innerHTML='<option value="">কয়েন তালিকা লোড হচ্ছে…</option>';
+  try{
+    const all = await fetchAllTickers();
+    const list = all
+      .filter(t=> t.symbol.endsWith('USDT') && !STABLE_OR_LEVERAGED.test(t.symbol) && Number(t.quoteVolume)>1000000)
+      .sort((a,b)=> Number(b.quoteVolume)-Number(a.quoteVolume))
+      .slice(0,200).map(t=>t.symbol).sort();
+    if(!list.length) throw new Error('empty universe');
+    fillCoinOptions(list);
+    statusEl.textContent=`${list.length}টি Binance Spot USDT coin প্রস্তুত · ${new Date().toLocaleTimeString('bn-BD')}`;
+  }catch(e){
+    select.innerHTML='<option value="">কয়েন তালিকা লোড হয়নি</option>';
+    statusEl.textContent='⚠️ Binance market list পাওয়া যায়নি — Retry চাপুন বা কিছুক্ষণ পরে চেষ্টা করুন।';
+  }
+}
+
+document.getElementById('addBtn').onclick=()=>{
+  const picked=[...select.selectedOptions].map(o=>o.value);
+  picked.forEach(s=>{ if(!watch.includes(s)) watch.push(s); });
+  v3FillSelects();
+  render();
+};
+document.getElementById('refreshBtn').onclick=render;
+document.getElementById('reloadMarketBtn').onclick=()=>{ tickerCache={data:null,ts:0}; loadCoinList(); autoReloadActiveTab(); };
+
+let userCapitalUSDT = 0;
+let userMaxLossUSDT = 0;
+let fxRate = 122; // fallback approx BDT per USDT, updated live if possible
+
+const capitalInputEl = document.getElementById('capitalInput');
+const maxLossInputEl = document.getElementById('maxLossInput');
+const riskCurrencyEl = document.getElementById('riskCurrency');
+const fxRateInputEl = document.getElementById('fxRateInput');
+
+function recomputeRiskInputs(){
+  const cap = parseFloat(capitalInputEl.value.replace(',','.')) || 0;
+  const loss = parseFloat(maxLossInputEl.value.replace(',','.')) || 0;
+  const rate = parseFloat(fxRateInputEl.value.replace(',','.')) || fxRate;
+  fxRate = rate;
+  if(riskCurrencyEl.value === 'BDT'){
+    userCapitalUSDT = cap / fxRate;
+    userMaxLossUSDT = loss / fxRate;
+  } else {
+    userCapitalUSDT = cap;
+    userMaxLossUSDT = loss;
+  }
+  render();
+}
+[capitalInputEl, maxLossInputEl, riskCurrencyEl, fxRateInputEl].forEach(el=>{
+  el.addEventListener('change', recomputeRiskInputs);
+});
+
+async function fetchFxRate(){
+  try{
+    const r = await fetch('https://open.er-api.com/v6/latest/USD');
+    if(!r.ok) throw new Error('fx fail');
+    const data = await r.json();
+    if(data && data.rates && data.rates.BDT){
+      fxRateInputEl.value = Math.round(data.rates.BDT);
+      recomputeRiskInputs();
+    }
+  }catch(e){ /* keep fallback default rate */ }
+}
+
+async function loadFearGreed(){
+  const el = document.getElementById('fngWidget');
+  try{
+    const r = await fetch('https://api.alternative.me/fng/?limit=1');
+    if(!r.ok) throw new Error('fng fail');
+    const data = await r.json();
+    const d = data && data.data && data.data[0];
+    if(!d) return;
+    const map = {'Extreme Fear':'অতিরিক্ত ভয় 😨','Fear':'ভয় 😟','Neutral':'নিরপেক্ষ 😐','Greed':'লোভ 😏','Extreme Greed':'অতিরিক্ত লোভ 🤑'};
+    const label = map[d.value_classification] || d.value_classification;
+    el.style.display = 'block';
+    el.innerHTML = `📊 <b>মার্কেট সেন্টিমেন্ট (Fear &amp; Greed Index):</b> ${d.value}/100 — ${label}`;
+  }catch(e){ /* widget stays hidden on failure */ }
+}
+
+
+const tabPanes = {
+  command: document.getElementById('tabPane-command'),
+  early: document.getElementById('tabPane-early'),
+  main: document.getElementById('tabPane-main'),
+  trend: document.getElementById('tabPane-trend'),
+  rsi: document.getElementById('tabPane-rsi'),
+  mtf: document.getElementById('tabPane-mtf'),
+  fast: document.getElementById('tabPane-fast'),
+  calc: document.getElementById('tabPane-calc'),
+  best: document.getElementById('tabPane-best'),
+  catalyst: document.getElementById('tabPane-catalyst'), fundamental: document.getElementById('tabPane-fundamental'), scanner: document.getElementById('tabPane-scanner'), flow: document.getElementById('tabPane-flow'), breakout: document.getElementById('tabPane-breakout'), regime: document.getElementById('tabPane-regime'), journal: document.getElementById('tabPane-journal'), backtest: document.getElementById('tabPane-backtest'), futures: document.getElementById('tabPane-futures'),
+};
+const tabLoaded = { command:true, early:false, main:true, trend:false, rsi:false, mtf:false, fast:false, calc:true, best:true, catalyst:false, fundamental:false, scanner:true, flow:true, regime:true, journal:true, backtest:true, futures:true };
+const tabBtns = document.querySelectorAll('.tabBtn');
+tabBtns.forEach(btn=>{
+  btn.onclick = async ()=>{
+    const tab = btn.dataset.tab;
+    // calculator: same button opens and hides
+    if(tab==='calc' && btn.classList.contains('active')){
+      btn.classList.remove('active');
+      tabPanes.calc.classList.add('hiddenAll');
+      return;
+    }
+    tabBtns.forEach(b=>b.classList.toggle('active', b===btn));
+    Object.keys(tabPanes).forEach(k=>{
+      tabPanes[k].classList.toggle('hiddenAll', k!==tab);
+    });
+    if(!tabLoaded[tab]){
+      tabLoaded[tab] = true;
+      if(tab==='early') await runEarlyOpportunity();
+      else if(tab==='trend') await loadTrending();
+      else if(tab==='rsi') await loadRsiZones();
+      else if(tab==='mtf') await loadMtfSignals();
+      else if(tab==='fast') await loadFastMovers();
+      else if(tab==='fundamental') await runFundamental();
+      else if(tab==='catalyst') await loadCatalystScan();
+    }
+  };
+});
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-jump]'); if(!el) return;
+ const tab=el.dataset.jump; const btn=document.querySelector(`.tabBtn[data-tab="${tab}"]`); if(btn) btn.click();
+ const sym=el.dataset.symbol; if(sym){ const sel=document.getElementById('fundamentalCoinSelect'); if(sel) sel.value=sym; const inp=document.getElementById('fundamentalCoinInput'); if(inp) inp.value=sym; }
+});
+document.getElementById('commandRefreshBtn').onclick=runCommandCenter;
+document.getElementById('commandCount').onchange=runCommandCenter;
+document.querySelector('.tabBtn[data-tab="command"]').classList.add('active');
+Object.keys(tabPanes).forEach(k=>tabPanes[k].classList.toggle('hiddenAll', k!=='command'));
+
+document.getElementById('trendRefreshBtn').onclick = loadTrending;
+
+async function showTrendDetail(symbol){
+  const detailEl = document.getElementById('trendDetail');
+  if(!symbol){ detailEl.innerHTML = ''; return; }
+  detailEl.innerHTML = '<div class="sub">লোড হচ্ছে…</div>';
+  try{
+    const [ticker, candles, m1candles, c30, c4h, orderBook] = await Promise.all([fetchTicker(symbol), fetchKlines(symbol), fetchKlines(symbol,'1m',15), fetchKlines(symbol,'30m',1), fetchKlines(symbol,'4h',1), fetchOrderBook(symbol)]);
+    detailEl.innerHTML = `<div class="grid">${cardHTML(symbol, ticker, candles, m1candles, c30, c4h, orderBook)}</div>`;
+    loadLiveNews([symbol], 'livenews-main-');
+  }catch(e){
+    detailEl.innerHTML = '<div class="sub" style="color:var(--red);">ডাটা আনা যায়নি।</div>';
+  }
+}
+document.getElementById('trendDetailSelect').onchange = (e)=> showTrendDetail(e.target.value);
+document.getElementById('trendDetailClear').onclick = ()=>{
+  document.getElementById('trendDetailSelect').value = '';
+  document.getElementById('trendDetail').innerHTML = '';
+};
+document.getElementById('fastRefreshBtn').onclick = ()=>loadFastMovers();
+
+function removePair(symbol){
+  watch = watch.filter(s=>s!==symbol);
+  render();
+}
+window.removePair = removePair;
+
+function rsi(closes, period=14){
+  if(closes.length < period+1) return null;
+  let gains=0, losses=0;
+  for(let i=closes.length-period;i<closes.length;i++){
+    const diff = closes[i]-closes[i-1];
+    if(diff>=0) gains+=diff; else losses-=diff;
+  }
+  const avgGain=gains/period, avgLoss=losses/period;
+  if(avgLoss===0) return 100;
+  const rs=avgGain/avgLoss;
+  return 100 - (100/(1+rs));
+}
+function sma(closes,period){
+  if(closes.length<period) return null;
+  const slice=closes.slice(-period);
+  return slice.reduce((a,b)=>a+b,0)/period;
+}
+
+async function fetchTicker(symbol){
+  const r = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`);
+  if(!r.ok) throw new Error('ticker fail');
+  return r.json();
+}
+async function fetchKlines(symbol, interval='1h', limit=50){
+  const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+  if(!r.ok) throw new Error('klines fail');
+  const data = await r.json();
+  return data.map(k=>({high:parseFloat(k[2]), low:parseFloat(k[3]), close:parseFloat(k[4]), volume:parseFloat(k[5]), quoteVol:parseFloat(k[7]), takerBuyVol:parseFloat(k[9]), takerBuyQuoteVol:parseFloat(k[10])}));
+}
+async function fetchOrderBook(symbol, limit=100){
+  const r = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=${limit}`);
+  if(!r.ok) throw new Error('depth fail');
+  const data = await r.json();
+  return {
+    bids: data.bids.map(b=>({price:parseFloat(b[0]), qty:parseFloat(b[1])})),
+    asks: data.asks.map(a=>({price:parseFloat(a[0]), qty:parseFloat(a[1])}))
+  };
+}
+
+function analyzeOrderBook(book, currentPrice){
+  const bidUSDT = book.bids.reduce((s,b)=>s+b.price*b.qty,0);
+  const askUSDT = book.asks.reduce((s,a)=>s+a.price*a.qty,0);
+  const total = bidUSDT+askUSDT;
+  const bidPct = total>0 ? bidUSDT/total*100 : 50;
+  let bias, biasCls;
+  if(bidPct>=58){ bias='বুলিশ ঝোঁক (বাই সাইড ভারী)'; biasCls='buy'; }
+  else if(bidPct<=42){ bias='বেয়ারিশ ঝোঁক (সেল সাইড ভারী)'; biasCls='sell'; }
+  else { bias='নিরপেক্ষ/সুষম'; biasCls='hold'; }
+
+  const allLevels = [
+    ...book.bids.map(b=>({side:'bid', price:b.price, value:b.price*b.qty})),
+    ...book.asks.map(a=>({side:'ask', price:a.price, value:a.price*a.qty}))
+  ];
+  const avgValue = allLevels.length ? allLevels.reduce((s,l)=>s+l.value,0)/allLevels.length : 0;
+  const whaleThreshold = Math.max(avgValue*6, 30000);
+  const whales = allLevels.filter(l=>l.value>=whaleThreshold).sort((a,b)=>b.value-a.value);
+
+  const askWhalesAbove = whales.filter(w=>w.side==='ask' && w.price>currentPrice).sort((a,b)=>a.price-b.price);
+  const bidWhalesBelow = whales.filter(w=>w.side==='bid' && w.price<currentPrice).sort((a,b)=>b.price-a.price);
+
+  return {bidPct, bias, biasCls, askWhalesAbove, bidWhalesBelow};
+}
+
+function orderBookHTML(book, currentPrice){
+  if(!book) return `<div class="orderBookBlock" style="color:var(--muted);">📖 অর্ডার বুক ডাটা লোড হচ্ছে বা অনুপলব্ধ।</div>`;
+  const ob = analyzeOrderBook(book, currentPrice);
+  const res = ob.askWhalesAbove[0];
+  const sup = ob.bidWhalesBelow[0];
+  return `<div class="orderBookBlock">
+    <div style="color:var(--muted);margin-bottom:6px;">📖 অর্ডার বুক বিশ্লেষণ (লাইভ স্ন্যাপশট, শীর্ষ ১০০ লেভেল)</div>
+    <span class="trendVerdict ${ob.biasCls}" style="display:inline-block;margin-bottom:6px;">${ob.bias} (বাই সাইড ${ob.bidPct.toFixed(0)}%)</span>
+    ${res
+      ? `<div class="bestStat">🐋 হোয়েল সেল-ওয়াল: $${res.price.toFixed(4)}-এ ~${fmtMoney(res.value,'$')} — সম্ভাব্য রেজিস্ট্যান্স</div>`
+      : `<div class="bestStat" style="color:var(--muted);">উপরে উল্লেখযোগ্য কোনো সেল-ওয়াল দেখা যায়নি</div>`}
+    ${sup
+      ? `<div class="bestStat">🐋 হোয়েল বাই-ওয়াল: $${sup.price.toFixed(4)}-এ ~${fmtMoney(sup.value,'$')} — সম্ভাব্য সাপোর্ট</div>`
+      : `<div class="bestStat" style="color:var(--muted);">নিচে উল্লেখযোগ্য কোনো বাই-ওয়াল দেখা যায়নি</div>`}
+    <div style="color:var(--muted);font-size:10.5px;margin-top:4px;">⚠️ বড় অর্ডার যেকোনো সময় সরিয়ে নেওয়া (spoofing) সম্ভব — এটা একটা মুহূর্তের স্ন্যাপশট, নিশ্চিত দেয়াল না।</div>
+  </div>`;
+}
+
+let tickerCache={data:null,ts:0};
+async function fetchAllTickers(force=false){
+  if(!force && tickerCache.data && Date.now()-tickerCache.ts<10000) return tickerCache.data;
+  const endpoints=[
+    'https://api.binance.com/api/v3/ticker/24hr',
+    'https://api1.binance.com/api/v3/ticker/24hr',
+    'https://api2.binance.com/api/v3/ticker/24hr',
+    'https://api3.binance.com/api/v3/ticker/24hr'
+  ];
+  let lastErr=null;
+  for(const url of endpoints){
+    try{
+      const r=await fetch(url,{cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const data=await r.json();
+      if(Array.isArray(data) && data.length){tickerCache={data,ts:Date.now()};return data;}
+    }catch(e){lastErr=e;}
+  }
+  throw lastErr||new Error('tickers fail');
+}
+
+const STABLE_OR_LEVERAGED = /(UP|DOWN|BULL|BEAR)USDT$|^(USDC|BUSD|FDUSD|TUSD|DAI|USDP|EUR|GBP|TRY|BRL)USDT$/;
+
+function classifyTrend(candles){
+  const vols = candles.map(c=>c.volume);
+  const closes = candles.map(c=>c.close);
+  const n = vols.length;
+  const recent = vols.slice(-6);
+  const prior = vols.slice(0, Math.max(n-6,1));
+  const avgRecent = recent.reduce((a,b)=>a+b,0)/recent.length;
+  const avgPrior = prior.length ? prior.reduce((a,b)=>a+b,0)/prior.length : avgRecent;
+  const volRatio = avgPrior>0 ? avgRecent/avgPrior : 1;
+  const rsiVal = rsi(closes,14);
+  const ma7 = sma(closes,7), ma25 = sma(closes,25);
+  const trendUp = ma7!=null && ma25!=null && ma7>ma25;
+
+  let verdict, cls, reason, sizing;
+  if(volRatio>2.2 && rsiVal!=null && rsiVal>75){
+    verdict='⚠️ সম্ভবত পাম্প/গুজবভিত্তিক'; cls='hype';
+    reason=`ভলিউম হঠাৎ ${volRatio.toFixed(1)}x বেড়েছে, RSI ${rsiVal.toFixed(0)} (ওভারবট) — এটা মৌলিক ভ্যালুর চেয়ে স্বল্পমেয়াদী স্পাইক/হাইপ হতে পারে।`;
+    sizing='এড়িয়ে চলাই ভালো — যদি নেন, খুবই ছোট পজিশন ও টাইট স্টপ-লস দিয়ে।';
+  } else if(volRatio>=1.15 && volRatio<=2.2 && trendUp && rsiVal!=null && rsiVal>=45 && rsiVal<=72){
+    verdict='✅ প্রকৃত ট্রেন্ডের সম্ভাবনা বেশি'; cls='genuine';
+    reason=`ভলিউম স্বাভাবিকভাবে বেড়েছে (${volRatio.toFixed(1)}x), MA7 > MA25, RSI স্থিতিশীল (${rsiVal.toFixed(0)}) — টেকসই আপট্রেন্ডের লক্ষণ।`;
+    sizing='স্বাভাবিক পজিশন সাইজ, নিচে দেওয়া স্টপ-লস মেনে চলুন।';
+  } else {
+    verdict='➖ অনিশ্চিত / মিশ্র সংকেত'; cls='neutral';
+    reason=`ভলিউম ও মোমেন্টাম রেশিও (${volRatio.toFixed(1)}x) স্পষ্ট দিক দেখাচ্ছে না — আরও কনফার্মেশনের অপেক্ষা করুন।`;
+    sizing='তাড়াহুড়ো না করে আরও কনফার্মেশনের অপেক্ষা করুন।';
+  }
+  return {verdict, cls, reason, sizing, volRatio, rsiVal};
+}
+
+function signalFor(price, ma25, rsiVal){
+  if(ma25==null || rsiVal==null) return {cls:'hold', label:'পর্যাপ্ত ডাটা নেই', text:'ইন্ডিকেটর হিসাব করতে আরো ডাটা দরকার।'};
+  if(price > ma25 && rsiVal < 70){
+    return {cls:'buy', label:'বাই', text:`দাম ২৫-ঘণ্টা গড়ের (${ma25.toFixed(2)}) উপরে, RSI ${rsiVal.toFixed(1)} — ওভারবট নয়। আপট্রেন্ড সচল থাকতে পারে।`};
+  }
+  if(price < ma25 && rsiVal < 45 && rsiVal>0){
+    return {cls:'sell', label:'সেল', text:`দাম ২৫-ঘণ্টা গড়ের (${ma25.toFixed(2)}) নিচে, মোমেন্টাম দুর্বল (RSI ${rsiVal.toFixed(1)})। ডাউনট্রেন্ড চলতে পারে — হোল্ডিং থাকলে বিক্রি বিবেচনা করুন।`};
+  }
+  return {cls:'hold', label:'অপেক্ষা করুন', text:`স্পষ্ট ট্রেন্ড নেই — দাম ${ma25.toFixed(2)} গড়ের কাছাকাছি, RSI ${rsiVal.toFixed(1)}।`};
+}
+
+const NEWSAPI_KEY = 'f47807843f0b4cc1a7bd4d0d64e7300e';
+
+async function fetchCoinHeadlines(coin){
+  const q = encodeURIComponent(coin + ' crypto');
+  const url = `https://newsapi.org/v2/everything?q=${q}&language=en&sortBy=publishedAt&pageSize=3&apiKey=${NEWSAPI_KEY}`;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error('newsapi fail');
+  const data = await r.json();
+  return (data.articles||[]).slice(0,3);
+}
+
+async function loadLiveNews(symbols, idPrefix){
+  await Promise.all(symbols.map(async s=>{
+    const coin = s.replace(/USDT$/,'');
+    const el = document.getElementById(idPrefix+s);
+    if(!el) return;
+    try{
+      const articles = await fetchCoinHeadlines(coin);
+      if(articles.length===0){
+        el.innerHTML = '<span class="k">📰 কোনো সাম্প্রতিক খবর পাওয়া যায়নি।</span>';
+        return;
+      }
+      el.innerHTML = '<span class="k">📰 সাম্প্রতিক খবর:</span><ul class="newsList">' +
+        articles.map(a=>`<li><a href="${a.url}" target="_blank">${(a.title||'').replace(/</g,'&lt;')}</a></li>`).join('') +
+        '</ul>';
+    }catch(e){
+      el.innerHTML = '<span class="k" style="color:var(--muted);">📰 লাইভ খবর লোড করা যায়নি — নিচের লিংক থেকে দেখুন।</span>';
+    }
+  }));
+}
+
+function newsLinksHTML(symbol){
+  const coin = symbol.replace(/USDT$/,'');
+  const q = encodeURIComponent(coin + ' crypto');
+  return `
+    <div class="newsRow">
+      <span class="k">📰 নিউজ:</span>
+      <a href="https://news.google.com/search?q=${q}" target="_blank">Google News</a>
+      <a href="https://www.coindesk.com/search?s=${encodeURIComponent(coin)}" target="_blank">CoinDesk</a>
+      <a href="https://cointelegraph.com/tags/${encodeURIComponent(coin.toLowerCase())}" target="_blank">CoinTelegraph</a>
+      <a href="https://www.binance.com/en/square/search?query=${encodeURIComponent(coin)}" target="_blank">Binance Square</a>
+    </div>`;
+}
+
+function positionSizeHTML(entry, stopLoss){
+  if(!(userCapitalUSDT>0) && !(userMaxLossUSDT>0)){
+    return `<div class="posSize">💰 উপরে মোট পুঁজি ও সর্বোচ্চ লস দিন — এই কয়েনে কত টাকার কেনা উচিত তা এখানে দেখাবে।</div>`;
+  }
+  const riskPerUnitPct = (entry-stopLoss)/entry;
+  if(!(riskPerUnitPct>0)){
+    return `<div class="posSize">⚠️ এই মুহূর্তে ঝুঁকি হিসাব করা যাচ্ছে না (এন্ট্রি/স্টপ-লস অসামঞ্জস্যপূর্ণ)।</div>`;
+  }
+  let positionUSDT;
+  if(userMaxLossUSDT>0 && userCapitalUSDT>0){
+    positionUSDT = Math.min(userMaxLossUSDT/riskPerUnitPct, userCapitalUSDT);
+  } else if(userMaxLossUSDT>0){
+    positionUSDT = userMaxLossUSDT/riskPerUnitPct;
+  } else {
+    positionUSDT = userCapitalUSDT;
+  }
+  const positionBDT = positionUSDT * fxRate;
+  const lossIfStopped = positionUSDT * riskPerUnitPct;
+  return `<div class="posSize">
+    💰 এই কয়েনে সর্বোচ্চ কেনা উচিত: <b>$${positionUSDT.toFixed(2)} USDT</b> ≈ <b>৳${positionBDT.toFixed(0)} BDT</b><br>
+    স্টপ-লসে থামলে সম্ভাব্য ক্ষতি: ~$${lossIfStopped.toFixed(2)} (≈৳${(lossIfStopped*fxRate).toFixed(0)})
+  </div>`;
+}
+
+function fmtMoney(usdVal, sym){
+  let v = Math.abs(usdVal), suffix='';
+  if(v>=1e6){ v=v/1e6; suffix='M'; }
+  else if(v>=1e3){ v=v/1e3; suffix='K'; }
+  return sym + v.toFixed(v<10?2:1) + suffix;
+}
+
+function buyerSellerHTML(m1, c30, h1candle, c4h){
+  function statsForM1(n){
+    if(!m1 || m1.length<n) return null;
+    const slice = m1.slice(-n);
+    let buyQ=0, totalQ=0;
+    slice.forEach(c=>{ buyQ+=(c.takerBuyQuoteVol||0); totalQ+=(c.quoteVol||0); });
+    if(totalQ<=0) return null;
+    return {buyQ, sellQ: totalQ-buyQ, ratio: buyQ/totalQ*100};
+  }
+  function statsSingle(c){
+    if(!c || !(c.quoteVol>0)) return null;
+    const buyQ = c.takerBuyQuoteVol||0;
+    return {buyQ, sellQ: c.quoteVol-buyQ, ratio: buyQ/c.quoteVol*100};
+  }
+  const entries = [
+    ['১ মিনিট', statsForM1(1)],
+    ['৩ মিনিট', statsForM1(3)],
+    ['৫ মিনিট', statsForM1(5)],
+    ['১৫ মিনিট', statsForM1(15)],
+    ['৩০ মিনিট', statsSingle(c30)],
+    ['১ ঘণ্টা', statsSingle(h1candle)],
+    ['৪ ঘণ্টা', statsSingle(c4h)],
+  ];
+  const row = (label, s) => {
+    if(!s) return `<div class="bsRow"><span class="bsLabel">${label}</span><span style="color:var(--muted);">ডাটা নেই</span></div>`;
+    const r = s.ratio;
+    return `<div class="bsRow">
+      <span class="bsLabel">${label}</span>
+      <div class="bsBar"><div class="bsBuy" style="width:${r}%"></div><div class="bsSell" style="width:${100-r}%"></div></div>
+      <span class="bsPct">🟢${r.toFixed(0)}% 🔴${(100-r).toFixed(0)}%</span>
+    </div>
+    <div class="bsAmt">
+      বাই: ${fmtMoney(s.buyQ,'$')} (৳${fmtMoney(s.buyQ*fxRate,'').trim()}) &nbsp; · &nbsp;
+      সেল: ${fmtMoney(s.sellQ,'$')} (৳${fmtMoney(s.sellQ*fxRate,'').trim()})
+    </div>`;
+  };
+  return `<div class="buyerSeller">
+    <div style="color:var(--muted);margin-bottom:6px;">👥 বায়ার/সেলার (টেকার ভলিউম, % ও পরিমাণ)</div>
+    ${entries.map(([l,s])=>row(l,s)).join('')}
+  </div>`;
+}
+
+function cardHTML(symbol, ticker, candles, m1candles, c30, c4h, orderBook){
+  const price = parseFloat(ticker.lastPrice);
+  const chg = parseFloat(ticker.priceChangePercent);
+  const chgCls = chg>0.05?'up':(chg<-0.05?'down':'flat');
+  const closes = candles.map(c=>c.close);
+  const highs = candles.map(c=>c.high);
+  const lows = candles.map(c=>c.low);
+  const ma7 = sma(closes,7), ma25 = sma(closes,25);
+  const rsiVal = rsi(closes,14);
+  const sig = signalFor(price, ma25, rsiVal);
+
+  const resistance = highs.length? Math.max(...highs): null;
+  const support = lows.length? Math.min(...lows): null;
+  const gainPct = resistance ? ((resistance-price)/price*100) : null;
+  const riskPct = support ? ((price-support)/price*100) : null;
+
+  const entry = support ? Math.min(price, ma7||price) : price;
+  const target = resistance || price*1.03;
+  const stopLoss = support ? support*1.002 : price*0.97;
+  const rr = (entry-stopLoss)>0 ? ((target-entry)/(entry-stopLoss)).toFixed(2) : '—';
+
+  const pctBadge = sig.cls==='buy' && gainPct!=null
+    ? `<span class="pct buy">+${gainPct.toFixed(1)}% সম্ভাব্য</span>`
+    : sig.cls==='sell' && riskPct!=null
+    ? `<span class="pct sell">-${riskPct.toFixed(1)}% রিস্ক</span>`
+    : '';
+
+  return `
+  <div class="card">
+    <button class="removeBtn" onclick="removePair('${symbol}')" title="বাদ দিন">✕</button>
+    <div class="sym">${symbol}</div>
+    <div class="price">$${price.toLocaleString(undefined,{maximumFractionDigits:6})}</div>
+    <div class="chg ${chgCls}">${chg>0?'+':''}${chg.toFixed(2)}% (24h)</div>
+    <div class="signal ${sig.cls}">
+      <span class="label">${sig.label} ${pctBadge}</span>
+      ${sig.text}
+    </div>
+    <div class="levels">
+      <div class="lv"><span class="k">এন্ট্রি (বাই লিমিট)</span><span class="v">$${entry.toFixed(4)}</span></div>
+      <div class="lv"><span class="k">টার্গেট (সেল লিমিট)</span><span class="v">$${target.toFixed(4)}</span></div>
+      <div class="lv"><span class="k">স্টপ-লস</span><span class="v" style="color:var(--red);">$${stopLoss.toFixed(4)}</span></div>
+      <div class="lv"><span class="k">রিস্ক:রিওয়ার্ড</span><span class="v">1 : ${rr}</span></div>
+    </div>
+    <div class="rr">রেজিস্ট্যান্স (৫০ঘ): $${resistance?resistance.toFixed(4):'—'} · সাপোর্ট: $${support?support.toFixed(4):'—'}</div>
+    ${positionSizeHTML(entry, stopLoss)}
+    <div class="meta">
+      <span>MA7: ${ma7?ma7.toFixed(2):'—'}</span>
+      <span>MA25: ${ma25?ma25.toFixed(2):'—'}</span>
+      <span>RSI14: ${rsiVal?rsiVal.toFixed(1):'—'}</span>
+    </div>
+    ${buyerSellerHTML(m1candles, c30&&c30[0], candles&&candles[candles.length-1], c4h&&c4h[0])}
+    ${orderBookHTML(orderBook, price)}
+    ${newsLinksHTML(symbol)}
+    <div class="liveNews" id="livenews-main-${symbol}"><span class="k">📰 সাম্প্রতিক খবর লোড হচ্ছে…</span></div>
+  </div>`;
+}
+
+function tfDetail(candles){
+  const closes = candles.map(c=>c.close);
+  const highs = candles.map(c=>c.high);
+  const lows = candles.map(c=>c.low);
+  const series = computeRSISeries(closes,14);
+  const rsiVal = series[series.length-1];
+  const ma7 = sma(closes,7), ma25 = sma(closes,25);
+  const price = closes.length?closes[closes.length-1]:null;
+  const resistance = highs.length?Math.max(...highs):null;
+  const support = lows.length?Math.min(...lows):null;
+  const bullish = (ma7!=null && ma25!=null && ma7>ma25) && (price!=null && ma25!=null && price>ma25) && (rsiVal!=null && rsiVal>45 && rsiVal<70);
+  const bearish = (ma7!=null && ma25!=null && ma7<ma25) && (price!=null && ma25!=null && price<ma25);
+  return {price, ma7, ma25, rsiVal, resistance, support, bullish, bearish};
+}
+
+function findConfluenceLevel(levels, tolerancePct){
+  for(const lvl of levels){
+    const nearCount = levels.filter(l=> Math.abs(l-lvl)/lvl*100 <= tolerancePct).length;
+    if(nearCount>=2) return lvl;
+  }
+  return levels.length ? levels[0] : null;
+}
+
+async function computeAdvancedPick(symbol){
+  const [c1d, c12h, c4h, c1h, c30m, ticker, m1] = await Promise.all([
+    fetchKlines(symbol,'1d',30),
+    fetchKlines(symbol,'12h',30),
+    fetchKlines(symbol,'4h',50),
+    fetchKlines(symbol,'1h',50),
+    fetchKlines(symbol,'30m',50),
+    fetchTicker(symbol),
+    fetchKlines(symbol,'1m',5)
+  ]);
+  const price = parseFloat(ticker.lastPrice);
+  const tfList = [
+    {name:'১দিন', ...tfDetail(c1d)},
+    {name:'১২ঘ', ...tfDetail(c12h)},
+    {name:'৪ঘ', ...tfDetail(c4h)},
+    {name:'১ঘ', ...tfDetail(c1h)},
+    {name:'৩০মি', ...tfDetail(c30m)},
+  ];
+  const closes1d = c1d.map(c=>c.close);
+  const chg2d = closes1d.length>=3 ? ((price-closes1d[closes1d.length-3])/closes1d[closes1d.length-3]*100) : null;
+
+  const bullCount = tfList.filter(t=>t.bullish).length;
+  const bearCount = tfList.filter(t=>t.bearish).length;
+
+  const resistances = tfList.map(t=>t.resistance).filter(r=>r!=null && r>price).sort((a,b)=>a-b);
+  const supports = tfList.map(t=>t.support).filter(s=>s!=null && s<price).sort((a,b)=>b-a);
+  const target = findConfluenceLevel(resistances,1.5) || tfList[2].resistance || price*1.03;
+  const stopLoss = findConfluenceLevel(supports,1.5) || tfList[2].support || price*0.97;
+
+  let buy5=null;
+  if(m1 && m1.length>=5){
+    let buy=0,total=0;
+    m1.slice(-5).forEach(c=>{ buy+=(c.takerBuyVol||0); total+=(c.volume||0); });
+    if(total>0) buy5 = buy/total*100;
+  }
+
+  const rr = (stopLoss<price && target>price) ? (target-price)/(price-stopLoss) : null;
+  const gainPct = target ? ((target-price)/price*100) : null;
+
+  let score = bullCount*2 - bearCount;
+  if(buy5!=null) score += (buy5-50)/10;
+  if(rr!=null) score += Math.min(rr,3);
+
+  return {symbol, price, tfList, chg2d, bullCount, bearCount, target, stopLoss, rr, gainPct, buy5, score};
+}
+
+function advancedPickCardHTML(p, rank){
+  const badge = t => t.bullish ? '✅' : (t.bearish ? '❌' : '➖');
+  const tfRow = p.tfList.map(t=>`${t.name}:${badge(t)}`).join(' &nbsp; ');
+  const buyerLine = p.buy5!=null ? `🟢${p.buy5.toFixed(0)}% 🔴${(100-p.buy5).toFixed(0)}% (৫মি টেকার)` : 'ডাটা নেই';
+  return `
+  <div class="bestCard">
+    <span class="bestRank">#${rank} সেরা সুযোগ</span>
+    <div class="bestSym">${p.symbol}</div>
+    <div class="bestStat">বর্তমান: $${p.price.toFixed(4)} ${p.chg2d!=null?`· ২দিন: ${p.chg2d>0?'+':''}${p.chg2d.toFixed(1)}%*`:''}</div>
+    <div class="bestStat">টাইমফ্রেম: ${tfRow}</div>
+    <div class="bestStat">টার্গেট (কনফ্লুয়েন্স রেজিস্ট্যান্স): $${p.target.toFixed(4)} ${p.gainPct!=null?`(+${p.gainPct.toFixed(1)}%)`:''}</div>
+    <div class="bestStat">স্টপ-লস (কনফ্লুয়েন্স সাপোর্ট): $${p.stopLoss.toFixed(4)}</div>
+    <div class="bestStat">রিস্ক:রিওয়ার্ড: ${p.rr!=null?`1 : ${p.rr.toFixed(2)}`:'—'}</div>
+    <div class="bestStat">বায়ার/সেলার: ${buyerLine}</div>
+  </div>`;
+}
+
+async function runBestPickAnalysis(){
+  const el=document.getElementById('bestPick'),st=document.getElementById('bestPickStatus');
+  el.innerHTML=''; st.textContent='Binance market থেকে সেরা candidates বাছাই করা হচ্ছে…';
+  try{
+    const uni=await getEligibleBreakoutUniverse(true);
+    const candidates=uni.slice(0,25).map(x=>x.symbol);
+    st.textContent=`${candidates.length}টি liquid pair-এর multi-timeframe analysis চলছে…`;
+    const results=await mapWithConcurrency(candidates,5,async s=>{try{return await computeAdvancedPick(s)}catch(e){return null}});
+    const qualifying=results.filter(r=>r&&r.bullCount>=3&&r.rr!=null&&r.rr>=1).sort((a,b)=>b.score-a.score);
+    el.innerHTML=qualifying.length?qualifying.slice(0,5).map((p,i)=>advancedPickCardHTML(p,i+1)).join(''):'<div class="sub">এই scan-এ একাধিক timeframe-এ শক্তিশালী qualifying opportunity পাওয়া যায়নি।</div>';
+    st.textContent=`${qualifying.length}টি qualifying setup · ${candidates.length}টি pair scan · ${new Date().toLocaleTimeString('bn-BD')}`;
+  }catch(e){st.textContent='Market scan ব্যর্থ — নেটওয়ার্ক/Binance API আবার চেষ্টা করুন।';}
+}
+document.getElementById('bestPickBtn').onclick = runBestPickAnalysis;
+
+async function render(){
+  statusEl.textContent = 'আপডেট হচ্ছে…';
+  if(watch.length===0){
+    grid.innerHTML = '<div class="heroEmpty"><div class="big">🪙</div><b style="font-size:16px;color:var(--text)">আপনার watchlist এখন খালি</b><div style="margin-top:6px">কোনো coin নিজে থেকে দেখানো হবে না। উপরের coin list থেকে এক বা একাধিক coin select করে <b>“যোগ করুন”</b> চাপুন।</div></div>';
+    statusEl.textContent = 'কোনো কয়েন নির্বাচিত নেই';
+    return;
+  }
+  try{
+    const results = await Promise.all(watch.map(async s=>{
+      try{
+        const [ticker, candles, m1candles, c30, c4h, orderBook] = await Promise.all([fetchTicker(s), fetchKlines(s), fetchKlines(s,'1m',15), fetchKlines(s,'30m',1), fetchKlines(s,'4h',1), fetchOrderBook(s)]);
+        return {s, html: cardHTML(s, ticker, candles, m1candles, c30, c4h, orderBook)};
+      }catch(e){
+        return {s, html:`<div class="card"><button class="removeBtn" onclick="removePair('${s}')">✕</button><div class="sym">${s}</div><div style="color:var(--red);font-size:13px;margin-top:8px;">ডাটা আনা যায়নি</div></div>`};
+      }
+    }));
+    grid.innerHTML = results.map(r=>r.html).join('');
+    loadLiveNews(watch, 'livenews-main-');
+    statusEl.textContent = 'সর্বশেষ আপডেট: ' + new Date().toLocaleTimeString('bn-BD');
+  }catch(e){
+    statusEl.textContent = 'ডাটা লোড ব্যর্থ — ইন্টারনেট সংযোগ / নেটওয়ার্ক সেটিংস যাচাই করুন।';
+  }
+}
+
+function trendCardHTML(symbol, ticker, verdict){
+  const price = parseFloat(ticker.lastPrice);
+  const chg = parseFloat(ticker.priceChangePercent);
+  const qVol = parseFloat(ticker.quoteVolume);
+  const qVolFmt = qVol>1e9 ? (qVol/1e9).toFixed(2)+'B' : qVol>1e6 ? (qVol/1e6).toFixed(1)+'M' : (qVol/1e3).toFixed(0)+'K';
+  return `
+  <div class="trendCard ${verdict.cls}">
+    <div class="trendHead">
+      <span class="trendSym">${symbol}</span>
+      <span class="trendVerdict ${verdict.cls}">${verdict.verdict}</span>
+    </div>
+    <div class="chg ${chg>0?'up':'down'}" style="margin-top:4px;">${chg>0?'+':''}${chg.toFixed(2)}% · ২৪ঘ ভলিউম $${qVolFmt}</div>
+    <div class="trendReason">${verdict.reason}</div>
+    <div class="trendSizing">🎯 ${verdict.sizing}</div>
+    ${newsLinksHTML(symbol)}
+    <div class="liveNews" id="livenews-trend-${symbol}"><span class="k">📰 সাম্প্রতিক খবর লোড হচ্ছে…</span></div>
+    <button class="miniBtn" onclick="addFromTrend('${symbol}')">মূল লিস্টে যোগ করুন</button>
+  </div>`;
+}
+
+function addFromTrend(symbol){
+  if(!watch.includes(symbol)) watch.push(symbol);
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+window.addFromTrend = addFromTrend;
+
+async function loadTrending(){
+  const trendStatus = document.getElementById('trendStatus');
+  const trendGrid = document.getElementById('trendGrid');
+  trendStatus.textContent = 'সব কয়েনের ডাটা আনা হচ্ছে…';
+  trendGrid.innerHTML = '';
+  try{
+    const all = await fetchAllTickers();
+    const candidates = all.filter(t=>{
+      return t.symbol.endsWith('USDT') &&
+             !STABLE_OR_LEVERAGED.test(t.symbol) &&
+             parseFloat(t.quoteVolume) > 20000000 && // liquidity filter
+             Math.abs(parseFloat(t.priceChangePercent)) > 2;
+    });
+    candidates.sort((a,b)=> Math.abs(parseFloat(b.priceChangePercent)) - Math.abs(parseFloat(a.priceChangePercent)));
+    const top = candidates.slice(0,12);
+
+    if(top.length===0){
+      trendStatus.textContent = 'এই মুহূর্তে উল্লেখযোগ্য ট্রেন্ডিং কয়েন পাওয়া যায়নি।';
+      return;
+    }
+
+    trendStatus.textContent = `${top.length}টি কয়েন বিশ্লেষণ করা হচ্ছে…`;
+    const results = await Promise.all(top.map(async t=>{
+      try{
+        const candles = await fetchKlines(t.symbol);
+        const verdict = classifyTrend(candles);
+        return trendCardHTML(t.symbol, t, verdict);
+      }catch(e){
+        return '';
+      }
+    }));
+    trendGrid.innerHTML = results.join('');
+    loadLiveNews(top.map(t=>t.symbol), 'livenews-trend-');
+    const detailSelect = document.getElementById('trendDetailSelect');
+    const prevVal = detailSelect.value;
+    detailSelect.innerHTML = '<option value="">— বিস্তারিত দেখতে কয়েন বাছুন —</option>' +
+      top.map(t=>`<option value="${t.symbol}">${t.symbol}</option>`).join('');
+    if(prevVal && top.some(t=>t.symbol===prevVal)) detailSelect.value = prevVal;
+    trendStatus.textContent = 'সর্বশেষ আপডেট: ' + new Date().toLocaleTimeString('bn-BD');
+  }catch(e){
+    trendStatus.textContent = 'ট্রেন্ডিং ডাটা আনা যায়নি — নেটওয়ার্ক যাচাই করুন।';
+  }
+}
+
+function computeRSISeries(closes, period=14){
+  const series = new Array(closes.length).fill(null);
+  for(let i=period; i<closes.length; i++){
+    series[i] = rsi(closes.slice(0, i+1), period);
+  }
+  return series;
+}
+
+function rsiCardHTML(item, zoneCls){
+  const chgCls = item.chg>0.05?'up':(item.chg<-0.05?'down':'flat');
+  return `
+  <div class="trendCard ${zoneCls}">
+    <div class="trendHead">
+      <span class="trendSym">${item.symbol}</span>
+      <span class="trendVerdict ${zoneCls}">RSI ${item.rsiVal.toFixed(1)}</span>
+    </div>
+    <div class="chg ${chgCls}" style="margin-top:4px;">$${item.price.toFixed(4)} · ${item.chg>0?'+':''}${item.chg.toFixed(2)}% (24h)</div>
+    <div class="trendReason">⏱️ প্রায় <b>${item.hours}</b> ঘণ্টা ধরে এই RSI জোনে আছে (১ঘ ক্যান্ডেল হিসেবে)</div>
+  </div>`;
+}
+
+async function loadRsiZones(){
+  const rsiStatus = document.getElementById('rsiStatus');
+  const oversoldEl = document.getElementById('rsiOversold');
+  const neutralEl = document.getElementById('rsiNeutral');
+  const overboughtEl = document.getElementById('rsiOverbought');
+  rsiStatus.textContent = 'সব কয়েনের ডাটা আনা হচ্ছে…';
+  oversoldEl.innerHTML = '';
+  neutralEl.innerHTML = '';
+  overboughtEl.innerHTML = '';
+  try{
+    const all = await fetchAllTickers();
+    const candidates = all
+      .filter(t=> t.symbol.endsWith('USDT') && !STABLE_OR_LEVERAGED.test(t.symbol) && parseFloat(t.quoteVolume) > 20000000)
+      .sort((a,b)=> parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+      .slice(0,60);
+
+    rsiStatus.textContent = `${candidates.length}টি কয়েনের RSI যাচাই করা হচ্ছে…`;
+
+    const oversold=[], neutral=[], overbought=[];
+    await Promise.all(candidates.map(async t=>{
+      try{
+        const candles = await fetchKlines(t.symbol);
+        const closes = candles.map(c=>c.close);
+        const series = computeRSISeries(closes,14);
+        const latest = series[series.length-1];
+        if(latest==null) return;
+        let zone=null;
+        if(latest<=30) zone='oversold';
+        else if(latest>=70) zone='overbought';
+        else if(latest>=45 && latest<=55) zone='neutral';
+        if(!zone) return;
+        let hours=0;
+        for(let i=series.length-1;i>=0;i--){
+          const v=series[i];
+          if(v==null) break;
+          const inZone = zone==='oversold'? v<=30 : zone==='overbought'? v>=70 : (v>=45&&v<=55);
+          if(inZone) hours++; else break;
+        }
+        const item = {symbol:t.symbol, rsiVal:latest, hours, price:parseFloat(t.lastPrice), chg:parseFloat(t.priceChangePercent)};
+        if(zone==='oversold') oversold.push(item);
+        else if(zone==='overbought') overbought.push(item);
+        else neutral.push(item);
+      }catch(e){ /* skip this coin */ }
+    }));
+
+    oversold.sort((a,b)=> a.rsiVal-b.rsiVal);
+    overbought.sort((a,b)=> b.rsiVal-a.rsiVal);
+    neutral.sort((a,b)=> b.hours-a.hours);
+
+    oversoldEl.innerHTML = oversold.length ? oversold.map(i=>rsiCardHTML(i,'buy')).join('') : '<div class="sub">এই মুহূর্তে কোনো কয়েন ওভারসোল্ড জোনে নেই।</div>';
+    neutralEl.innerHTML = neutral.length ? neutral.map(i=>rsiCardHTML(i,'hold')).join('') : '<div class="sub">এই মুহূর্তে কোনো কয়েন নিরপেক্ষ জোনে নেই।</div>';
+    overboughtEl.innerHTML = overbought.length ? overbought.map(i=>rsiCardHTML(i,'sell')).join('') : '<div class="sub">এই মুহূর্তে কোনো কয়েন ওভারবট জোনে নেই।</div>';
+
+    rsiStatus.textContent = 'সর্বশেষ আপডেট: ' + new Date().toLocaleTimeString('bn-BD');
+  }catch(e){
+    rsiStatus.textContent = 'RSI ডাটা আনা যায়নি — নেটওয়ার্ক যাচাই করুন।';
+  }
+}
+
+document.getElementById('rsiRefreshBtn').onclick = loadRsiZones;
+
+function tfAnalysis(candles){
+  const closes = candles.map(c=>c.close);
+  const series = computeRSISeries(closes,14);
+  const latestRSI = series[series.length-1];
+  const ma7 = sma(closes,7), ma25 = sma(closes,25);
+  const price = closes[closes.length-1];
+  const bullish = (ma7!=null && ma25!=null && ma7>ma25) && (price>ma25) && (latestRSI!=null && latestRSI>45 && latestRSI<70);
+  const bearish = (ma7!=null && ma25!=null && ma7<ma25) && (price<ma25);
+  return {closes, series, latestRSI, bullish, bearish};
+}
+
+function detectBullishDivergence(closes, series){
+  const n = closes.length;
+  if(n<20) return false;
+  const mid = Math.floor(n/2);
+  const olderHalf = closes.slice(0, mid);
+  const newerHalf = closes.slice(mid);
+  let oldLowIdx = 0;
+  for(let i=1;i<olderHalf.length;i++){ if(olderHalf[i]<olderHalf[oldLowIdx]) oldLowIdx=i; }
+  let newLowIdx = 0;
+  for(let i=1;i<newerHalf.length;i++){ if(newerHalf[i]<newerHalf[newLowIdx]) newLowIdx=i; }
+  const oldLowPrice = olderHalf[oldLowIdx];
+  const newLowPrice = newerHalf[newLowIdx];
+  const oldLowRSI = series[oldLowIdx];
+  const newLowRSI = series[mid+newLowIdx];
+  if(oldLowRSI==null || newLowRSI==null) return false;
+  return newLowPrice < oldLowPrice && newLowRSI > oldLowRSI;
+}
+
+function mtfCardHTML(item){
+  const badge = tf => tf.bullish ? '✅' : (tf.bearish ? '❌' : '➖');
+  return `
+  <div class="trendCard ${item.cls}">
+    <div class="trendHead">
+      <span class="trendSym">${item.symbol}</span>
+      <span class="trendVerdict ${item.cls}">${item.label}</span>
+    </div>
+    <div class="chg up" style="margin-top:4px;">$${item.price.toFixed(4)}</div>
+    <div class="trendReason">
+      1ঘ: ${badge(item.h1)} &nbsp; 4ঘ: ${badge(item.h4)} &nbsp; 1দিন: ${badge(item.d1)}
+      ${item.divergence ? ' &nbsp; 🔀 বুলিশ ডাইভারজেন্স' : ''}
+    </div>
+    <div class="trendSizing">⏱️ আনুমানিক সময়সীমা: ${item.horizon}</div>
+  </div>`;
+}
+
+async function loadMtfSignals(){
+  const mtfStatus = document.getElementById('mtfStatus');
+  const mtfGrid = document.getElementById('mtfGrid');
+  mtfStatus.textContent = 'কয়েন বাছাই করা হচ্ছে…';
+  mtfGrid.innerHTML = '';
+  try{
+    const all = await fetchAllTickers();
+    const candidates = all
+      .filter(t=> t.symbol.endsWith('USDT') && !STABLE_OR_LEVERAGED.test(t.symbol) && parseFloat(t.quoteVolume) > 20000000)
+      .sort((a,b)=> parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+      .slice(0,30);
+
+    mtfStatus.textContent = `${candidates.length}টি কয়েনে মাল্টি-টাইমফ্রেম বিশ্লেষণ চলছে (একটু সময় লাগতে পারে)…`;
+
+    const results = [];
+    await Promise.all(candidates.map(async t=>{
+      try{
+        const [c1h, c4h, c1d] = await Promise.all([
+          fetchKlines(t.symbol,'1h',50),
+          fetchKlines(t.symbol,'4h',50),
+          fetchKlines(t.symbol,'1d',50)
+        ]);
+        const h1 = tfAnalysis(c1h);
+        const h4 = tfAnalysis(c4h);
+        const d1 = tfAnalysis(c1d);
+        const divergence = detectBullishDivergence(h1.closes, h1.series);
+
+        const bullCount = [h1,h4,d1].filter(x=>x.bullish).length;
+        const score = bullCount + (divergence?2:0);
+        if(score < 2) return; // skip weak/irrelevant coins
+
+        let label, cls, horizon;
+        if(bullCount===3 && divergence){
+          label='শক্তিশালী সিগন্যাল'; cls='genuine';
+          horizon='কয়েক দিনের মধ্যে (দৈনিক টাইমফ্রেমেও সমর্থন আছে)';
+        } else if(bullCount===3){
+          label='সব টাইমফ্রেমে বুলিশ'; cls='genuine';
+          horizon='কয়েক দিনের মধ্যে';
+        } else if(bullCount===2 && divergence){
+          label='মাঝারি-শক্তিশালী সংকেত'; cls='genuine';
+          horizon='১-২ দিনের মধ্যে';
+        } else if(bullCount===2){
+          label='স্বল্পমেয়াদী বুলিশ'; cls='hype';
+          horizon='কয়েক ঘণ্টা থেকে ১ দিনের মধ্যে';
+        } else if(divergence){
+          label='সম্ভাব্য রিভার্সাল (ডাইভারজেন্স)'; cls='hype';
+          horizon='অনিশ্চিত — টাইমফ্রেম পুরোপুরি সমর্থন করছে না, সতর্কে দেখুন';
+        } else {
+          label='দুর্বল সংকেত'; cls='hype';
+          horizon='অনিশ্চিত';
+        }
+
+        results.push({
+          symbol: t.symbol, price: parseFloat(t.lastPrice),
+          h1, h4, d1, divergence, label, cls, horizon, score
+        });
+      }catch(e){ /* skip this coin */ }
+    }));
+
+    results.sort((a,b)=> b.score - a.score);
+    const top = results.slice(0,10);
+
+    if(top.length===0){
+      mtfStatus.textContent = 'এই মুহূর্তে কোনো কয়েনে যথেষ্ট শক্তিশালী মাল্টি-টাইমফ্রেম সিগন্যাল পাওয়া যায়নি।';
+      return;
+    }
+    mtfGrid.innerHTML = top.map(mtfCardHTML).join('');
+    mtfStatus.textContent = 'সর্বশেষ আপডেট: ' + new Date().toLocaleTimeString('bn-BD');
+  }catch(e){
+    mtfStatus.textContent = 'ডাটা আনা যায়নি — নেটওয়ার্ক যাচাই করুন।';
+  }
+}
+
+document.getElementById('mtfRefreshBtn').onclick = loadMtfSignals;
+
+function fastCardHTML(item, cls){
+  const fmt = v => (v>0?'+':'') + v.toFixed(2) + '%';
+  const col = v => v>0 ? 'up' : (v<0 ? 'down' : 'flat');
+  return `
+  <div class="trendCard ${cls}">
+    <div class="trendHead">
+      <span class="trendSym">${item.symbol}</span>
+      <span class="trendVerdict ${cls}">${fmt(item.c15)} (১৫মি)</span>
+    </div>
+    <div class="chg" style="margin-top:4px;">$${item.price.toFixed(4)}</div>
+    <div class="trendReason">
+      ৫মি: <b class="${col(item.c5)}">${fmt(item.c5)}</b> &nbsp;
+      ১০মি: <b class="${col(item.c10)}">${fmt(item.c10)}</b> &nbsp;
+      ১৫মি: <b class="${col(item.c15)}">${fmt(item.c15)}</b>
+    </div>
+  </div>`;
+}
+
+async function loadFastMovers(){
+  const st = document.getElementById('fastStatus');
+  const upEl = document.getElementById('fastUp');
+  const downEl = document.getElementById('fastDown');
+  st.textContent = 'সব কয়েনের ১ মিনিটের ডাটা আনা হচ্ছে…';
+  upEl.innerHTML = ''; downEl.innerHTML = '';
+  try{
+    const all = await fetchAllTickers();
+    const candidates = all
+      .filter(t=> t.symbol.endsWith('USDT') && !STABLE_OR_LEVERAGED.test(t.symbol) && parseFloat(t.quoteVolume) > 20000000)
+      .sort((a,b)=> parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+      .slice(0,80);
+    const ups=[], downs=[];
+    await Promise.all(candidates.map(async t=>{
+      try{
+        const candles = await fetchKlines(t.symbol,'1m',16);
+        const closes = candles.map(c=>c.close);
+        if(closes.length<16) return;
+        const now = closes[15];
+        const c5 = (now-closes[10])/closes[10]*100;
+        const c10 = (now-closes[5])/closes[5]*100;
+        const c15 = (now-closes[0])/closes[0]*100;
+        const item = {symbol:t.symbol, price:now, c5, c10, c15};
+        if(c5>0 && c10>0 && c15>=1) ups.push(item);
+        else if(c5<0 && c10<0 && c15<=-1) downs.push(item);
+      }catch(e){}
+    }));
+    ups.sort((a,b)=>b.c15-a.c15);
+    downs.sort((a,b)=>a.c15-b.c15);
+    upEl.innerHTML = ups.length ? ups.slice(0,8).map(i=>fastCardHTML(i,'genuine')).join('') : '<div class="sub">এই মুহূর্তে কোনো কয়েন দ্রুত বাড়ছে না (১৫ মিনিটে ১%+ ও তিন টাইমফ্রেমেই ঊর্ধ্বমুখী এমন কেউ নেই)।</div>';
+    downEl.innerHTML = downs.length ? downs.slice(0,8).map(i=>fastCardHTML(i,'hype')).join('') : '<div class="sub">এই মুহূর্তে কোনো কয়েন দ্রুত কমছে না।</div>';
+    st.textContent = 'সর্বশেষ আপডেট: ' + new Date().toLocaleTimeString('bn-BD');
+  }catch(e){
+    st.textContent = 'ডাটা আনা যায়নি — নেটওয়ার্ক যাচাই করুন।';
+  }
+}
+
+function runCalc(){
+  const num = id => parseFloat(document.getElementById(id).value.replace(',','.'));
+  const buy = num('calcBuy'), sl = num('calcSL'), tp = num('calcTP'), inv = num('calcInvest');
+  const cur = document.getElementById('calcCur').value;
+  const out = document.getElementById('calcOutput');
+  if(!(buy>0) || !(sl>0) || !(tp>0) || !(inv>0)){
+    out.innerHTML = '<div class="analyzeResult hold">বাই, SL, TP ও বিনিয়োগ — চারটাই সঠিক সংখ্যায় দিন।</div>';
+    return;
+  }
+  if(!(sl<buy) || !(tp>buy)){
+    out.innerHTML = '<div class="analyzeResult sell">⚠️ কেনার ট্রেডে SL অবশ্যই বাই প্রাইসের নিচে এবং TP বাই প্রাইসের উপরে হতে হবে।</div>';
+    return;
+  }
+  const investUSDT = cur==='BDT' ? inv/fxRate : inv;
+  const qty = investUSDT/buy;
+  const profitUSDT = qty*(tp-buy);
+  const lossUSDT = qty*(buy-sl);
+  const rr = (tp-buy)/(buy-sl);
+  const gainPct = (tp-buy)/buy*100;
+  const lossPct = (buy-sl)/buy*100;
+  const breakEven = 100/(1+rr);
+  let verdict, cls;
+  if(rr>=2){ verdict='✅ ভালো R:R (২ বা তার বেশি)'; cls='buy'; }
+  else if(rr>=1){ verdict='➖ মাঝারি R:R — ঝুঁকি ও লাভ কাছাকাছি'; cls='hold'; }
+  else { verdict='⚠️ দুর্বল R:R — ঝুঁকির তুলনায় লাভ কম'; cls='sell'; }
+  out.innerHTML = `<div class="analyzeResult ${cls}">
+    <b>${verdict}</b><br>
+    R:R = 1 : ${rr.toFixed(2)}<br><br>
+    🟢 TP-তে লাভ: <b>৳${(profitUSDT*fxRate).toFixed(0)}</b> ($${profitUSDT.toFixed(2)}) · +${gainPct.toFixed(2)}%<br>
+    🔴 SL-এ ক্ষতি: <b>৳${(lossUSDT*fxRate).toFixed(0)}</b> ($${lossUSDT.toFixed(2)}) · −${lossPct.toFixed(2)}%<br>
+    🪙 কয়েন পরিমাণ: ${qty.toFixed(4)}<br>
+    ⚖️ ব্রেক-ইভেন করতে অন্তত ${breakEven.toFixed(0)}% ট্রেড জিততে হবে<br>
+    <span style="color:var(--muted);font-size:11.5px;">(রেট: ১ USDT = ৳${fxRate} · ট্রেডিং ফি ধরা হয়নি)</span>
+  </div>`;
+}
+document.getElementById('calcBtn').onclick = runCalc;
+
+const CATALYST_TYPES = [
+  { key:'listing', words:['will list','new listing','lists ','listing on','added to binance','binance will list'],
+    label:'📌 নতুন লিস্টিং',
+    impact:'নতুন এক্সচেঞ্জে লিস্টিং সাধারণত নতুন বায়ার ও লিকুইডিটি নিয়ে আসে, স্বল্পমেয়াদে দাম বাড়ার সম্ভাবনা তৈরি করে।',
+    horizon:'ঘোষণার কয়েক ঘণ্টা থেকে ১-২ দিনের মধ্যে প্রতিক্রিয়া দেখা যায় সাধারণত' },
+  { key:'etf', words:['etf approval','spot etf','sec approv','blackrock','institutional inflow','etf inflow','etf launch'],
+    label:'🏦 ইটিএফ/প্রাতিষ্ঠানিক',
+    impact:'ইটিএফ অনুমোদন বা বড় প্রাতিষ্ঠানিক বিনিয়োগের খবর বড় তারল্য টানতে পারে, মাঝারি থেকে দীর্ঘমেয়াদী প্রভাব ফেলতে পারে।',
+    horizon:'ঘোষণার দিনই বড় নড়াচড়া, প্রভাব কয়েক সপ্তাহ পর্যন্ত গড়াতে পারে' },
+  { key:'upgrade', words:['mainnet','hard fork','network upgrade','testnet launch','protocol upgrade'],
+    label:'🔧 নেটওয়ার্ক আপগ্রেড',
+    impact:'মেইননেট/আপগ্রেড প্রযুক্তিগত উন্নতির সংকেত দেয়, বিনিয়োগকারীদের আস্থা বাড়াতে পারে।',
+    horizon:'আপগ্রেডের নির্দিষ্ট তারিখের আশেপাশে — আগে পজিশনিং, পরে "sell the news"ও হতে পারে' },
+  { key:'partnership', words:['partners with','partnership with','collaborat','integrates with','teams up'],
+    label:'🤝 পার্টনারশিপ',
+    impact:'বড় প্রতিষ্ঠানের সাথে পার্টনারশিপ প্রকল্পের বাস্তব ব্যবহারযোগ্যতা নিয়ে ইতিবাচক ধারণা তৈরি করতে পারে।',
+    horizon:'ঘোষণার ২৪-৪৮ ঘণ্টার মধ্যে সবচেয়ে বেশি প্রতিক্রিয়া, এরপর কমে আসে সাধারণত' },
+  { key:'tokenomics', words:['token burn','burn mechanism','halving','token unlock','airdrop','staking reward'],
+    label:'🔥 টোকেনোমিক্স ইভেন্ট',
+    impact:'বার্ন/হ্যালভিং সাপ্লাই কমায় (বুলিশ হতে পারে), কিন্তু বড় আনলক সাপ্লাই বাড়িয়ে বিক্রির চাপ তৈরি করতে পারে (বেয়ারিশ হতে পারে) — নির্ভর করে ইভেন্টের ধরনের উপর, নিজে যাচাই করুন।',
+    horizon:'ইভেন্টের নির্দিষ্ট তারিখের আশেপাশে, প্রায়ই আগে থেকেই দাম প্রতিফলিত হতে শুরু করে' },
+  { key:'risk', words:['lawsuit','sec charges','hack','exploit','delisted','investigation','ban on','fraud'],
+    label:'⚠️ নেগেটিভ/রেগুলেটরি ঝুঁকি',
+    impact:'আইনি/নিরাপত্তা ঝুঁকির খবর সাধারণত দাম কমানোর চাপ তৈরি করে, আস্থা কমে যেতে পারে।',
+    horizon:'খবর প্রকাশের সাথে সাথেই দ্রুত প্রতিক্রিয়া সম্ভব, কয়েক ঘণ্টার মধ্যেই বড় নড়াচড়া হতে পারে',
+    negative:true },
+];
+const DATE_RE = /((January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2}(st|nd|rd|th)?,?\s*\d{0,4})/i;
+
+async function fetchNewsApiArticles(coin){
+  const q=encodeURIComponent('"'+coin+'" crypto');
+  const url=`https://newsapi.org/v2/everything?q=${q}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${NEWSAPI_KEY}`;
+  const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error('newsapi '+r.status);
+  const data=await r.json();
+  return (data.articles||[]).map(a=>({title:a.title||'',description:a.description||a.content||'',url:a.url||'',source:a.source?.name||'NewsAPI',publishedAt:a.publishedAt}));
+}
+async function fetchCryptoCompareNews(coin){
+  const url=`https://min-api.cryptocompare.com/data/v2/news/?categories=${encodeURIComponent(coin)}&lang=EN`;
+  const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error('cryptocompare '+r.status);
+  const data=await r.json(); if(data.Response==='Error') throw new Error('cryptocompare error');
+  return (data.Data||[]).slice(0,10).map(a=>({title:a.title||'',description:a.body||'',url:a.url||'',source:a.source_info?.name||a.source||'CryptoCompare',publishedAt:a.published_on?new Date(a.published_on*1000).toISOString():null}));
+}
+async function fetchGoogleNewsRss(coin){
+  // Best-effort third source; if blocked by browser CORS it is simply skipped.
+  const q=encodeURIComponent(`${coin} crypto`);
+  const url=`https://news.google.com/rss/search?q=${q}&hl=en-US&gl=US&ceid=US:en`;
+  const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error('google news '+r.status);
+  const xml=await r.text();
+  const doc=new DOMParser().parseFromString(xml,'text/xml');
+  return [...doc.querySelectorAll('item')].slice(0,10).map(it=>({title:it.querySelector('title')?.textContent||'',description:it.querySelector('description')?.textContent||'',url:it.querySelector('link')?.textContent||'',source:'Google News',publishedAt:it.querySelector('pubDate')?.textContent||null}));
+}
+async function fetchCatalystArticles(coin){
+  const sets=await Promise.all([
+    fetchNewsApiArticles(coin).catch(()=>[]),
+    fetchCryptoCompareNews(coin).catch(()=>[]),
+    fetchGoogleNewsRss(coin).catch(()=>[])
+  ]);
+  const seen=new Set(), out=[];
+  for(const a of sets.flat()){
+    const key=(a.title||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+    if(key && !seen.has(key)){seen.add(key);out.push(a);}
+  }
+  return out;
+}
+function catalystScore(c, allArticles, priceData){
+  const now=Date.now();
+  const ageH=c.publishedAt?Math.max(0,(now-new Date(c.publishedAt).getTime())/3600000):72;
+  const fresh=Math.max(0,30-Math.min(30,ageH));
+  const sourceBoost=/binance|official|foundation|labs|blog|sec|blackrock/i.test(c.source+' '+c.title)?15:0;
+  const agreement=Math.min(20,(allArticles.filter(a=>{const x=(a.title+' '+a.description).toLowerCase();return CATALYST_TYPES.some(ct=>ct.words.some(w=>x.includes(w)));}).length-1)*5);
+  const type=detectCatalysts([c])[0];
+  let impact=type?.negative?-18:18;
+  const direction=type?.negative?'negative':'positive';
+  let confirm=0;
+  if(priceData){
+    if(direction==='positive' && priceData.chg>1 && priceData.volRatio>1.2) confirm=17;
+    else if(direction==='negative' && priceData.chg<-1 && priceData.volRatio>1.2) confirm=17;
+    else if(priceData.volRatio>1.2) confirm=7;
+  }
+  return Math.max(0,Math.min(100,Math.round(30+fresh+sourceBoost+agreement+impact+confirm)));
+}
+function detectCatalysts(articles){
+  const found=[];
+  for(const a of articles){
+    const raw=(a.title||'')+' '+(a.description||''); const text=raw.toLowerCase();
+    for(const ct of CATALYST_TYPES){
+      if(ct.words.some(w=>text.includes(w))){
+        const dm=raw.match(DATE_RE);
+        found.push({...ct,title:a.title,url:a.url,source:a.source||'',dateStr:dm?dm[0]:null,publishedAt:a.publishedAt});
+      }
+    }
+  }
+  return found;
+}
+function catalystCardHTML(symbol, items){
+  if(!items.length) return `<div class="trendCard hold"><div class="trendSym">${symbol}</div><div class="trendReason">সাম্প্রতিক যাচাইযোগ্য catalyst পাওয়া যায়নি।</div></div>`;
+  const max=Math.max(...items.map(x=>x.score)), neg=items.some(x=>x.negative), cls=neg?'sell':max>=75?'genuine':'hold';
+  return `<div class="trendCard ${cls}"><div class="trendHead"><span class="trendSym">${symbol}</span><span class="trendVerdict ${cls}">Catalyst ${max}/100</span></div>${items.slice(0,4).map(c=>`<div class="trendReason" style="margin-top:9px"><b>${c.label}</b> · <b>${c.score}/100</b><br>${c.impact}<br>⏱️ ${c.horizon}${c.dateStr?` · 📅 ${c.dateStr}`:''}<br><span class="v3small">Source: ${esc(c.source||'unknown')} · ${c.publishedAt?new Date(c.publishedAt).toLocaleString('bn-BD'): 'সময় অনিশ্চিত'}</span><br><a href="${c.url}" target="_blank" rel="noopener" style="color:var(--accent);font-size:11px">মূল সোর্স →</a></div>`).join('')}</div>`;
+}
+async function catalystPriceConfirmation(symbol){
+  try{
+    const [t,c]=await Promise.all([fetchTicker(symbol),fetchKlines(symbol,'1h',25)]);
+    const q=c.slice(-6).reduce((a,x)=>a+x.quoteVol,0)/6, p=c.slice(-24,-6).reduce((a,x)=>a+x.quoteVol,0)/18;
+    return {chg:Number(t.priceChangePercent)||0,volRatio:p?q/p:1};
+  }catch(e){return null;}
+}
+async function loadCatalystScan(){
+  const st=document.getElementById('catalystStatus'),grid=document.getElementById('catalystGrid'),prog=document.getElementById('catalystProgress');
+  grid.innerHTML='';prog.style.width='0%';st.textContent='Market universe তৈরি হচ্ছে…';
+  try{
+    const uni=await getEligibleBreakoutUniverse(true); const symbols=uni.slice(0,30).map(x=>x.symbol);
+    document.getElementById('catalystUniverse').textContent=`Universe: ${symbols.length}`; document.getElementById('catalystScanned').textContent='Scanned: 0';
+    const hours=Number(document.getElementById('catalystWindow').value||24), minScore=Number(document.getElementById('catalystMin').value||60);
+    const cutoff=Date.now()-hours*3600000;
+    const results=await mapWithConcurrency(symbols,3,async s=>{
+      try{
+        const coin=s.replace(/USDT$/,''); const [articles,pconf]=await Promise.all([fetchCatalystArticles(coin),catalystPriceConfirmation(s)]);
+        const fresh=articles.filter(a=>!a.publishedAt || new Date(a.publishedAt).getTime()>=cutoff);
+        const detected=detectCatalysts(fresh); const scored=detected.map(c=>({...c,score:catalystScore(c,fresh,pconf)})).filter(c=>c.score>=minScore).sort((a,b)=>b.score-a.score);
+        return {symbol:s,html:catalystCardHTML(s,scored),score:scored[0]?.score||0};
+      }catch(e){return {symbol:s,html:`<div class="trendCard hold"><div class="trendSym">${s}</div><div class="trendReason">News sources unavailable — pair skipped.</div></div>`,score:0};}
+    },(d,t)=>{prog.style.width=(d/t*100)+'%';document.getElementById('catalystScanned').textContent=`Scanned: ${d}/${t}`;});
+    results.sort((a,b)=>b.score-a.score);grid.innerHTML=results.filter(x=>x.score>0).slice(0,15).map(x=>x.html).join('') || '<div class="heroEmpty"><div class="big">🧨</div>এই window/score threshold-এ যাচাইযোগ্য catalyst পাওয়া যায়নি।</div>';
+    document.getElementById('catalystUpdated').textContent='Last scan: '+new Date().toLocaleTimeString('bn-BD');
+    st.textContent=`${symbols.length}টি liquid pair · multi-source catalyst scan সম্পন্ন`;
+  }catch(e){st.textContent='Catalyst scan ব্যর্থ — Binance market data/network আবার চেষ্টা করুন।';}
+}
+document.getElementById('catalystBtn').onclick=loadCatalystScan;
+document.getElementById('catalystRetry').onclick=loadCatalystScan;
+
+let timer=null;
+let autoBusy=false;
+async function autoReloadActiveTab(){
+  if(autoBusy) return; autoBusy=true;
+  try{
+    const active=document.querySelector('.tabBtn.active')?.dataset.tab||'main';
+    if(active==='main'){ if(watch.length) await render(); }
+    else if(active==='trend') await loadTrending();
+    else if(active==='rsi') await loadRsiZones();
+    else if(active==='mtf') await loadMtfSignals();
+    else if(active==='fast') await loadFastMovers();
+    else if(active==='catalyst') await loadCatalystScan();
+    else if(active==='fundamental') await runFundamental();
+    else if(active==='scanner') await runScanner();
+    else if(active==='flow') await runFlow();
+    else if(active==='breakout') await runBreakout(false);
+    else if(active==='regime') await runRegime();
+  }catch(e){} finally{autoBusy=false;}
+}
+function setupAuto(){
+  if(timer) clearInterval(timer);
+  if(document.getElementById('autoRefresh').checked){
+    timer=setInterval(autoReloadActiveTab,60000);
+    setTimeout(autoReloadActiveTab,250);
+  }
+}
+document.getElementById('autoRefresh').onchange=setupAuto;
+
+loadCoinList();
+fetchFxRate();
+loadFearGreed();
+
+// ===== V3 Trading Research Layer =====
+const V3 = { journal: JSON.parse(localStorage.getItem('v3_journal')||'[]') };
+function esc(x){return String(x??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+function v3score(parts){return Math.max(0,Math.min(100,Math.round(parts.reduce((a,b)=>a+b,0))));}
+async function scannerData(s){
+ const [t,c1,c4,c1m,ob]=await Promise.all([fetchTicker(s),fetchKlines(s,'1h',80),fetchKlines(s,'4h',60),fetchKlines(s,'1m',15),fetchOrderBook(s,100)]);
+ const p=+t.lastPrice, cl=c1.map(x=>x.close), r=rsi(cl), ma7=sma(cl,7), ma25=sma(cl,25);
+ const c4cl=c4.map(x=>x.close), r4=rsi(c4cl), ma74=sma(c4cl,7),ma254=sma(c4cl,25);
+ const volNow=c1.slice(-5).reduce((a,x)=>a+x.quoteVol,0)/5, volOld=c1.slice(-25,-5).reduce((a,x)=>a+x.quoteVol,0)/20, vr=volOld?volNow/volOld:1;
+ const buy5=c1m.reduce((a,x)=>a+x.takerBuyQuoteVol,0), tot5=c1m.reduce((a,x)=>a+x.quoteVol,0), bp=tot5?buy5/tot5*100:50;
+ const bid=ob.bids.reduce((a,x)=>a+x.price*x.qty,0),ask=ob.asks.reduce((a,x)=>a+x.price*x.qty,0), imb=(bid+ask)?bid/(bid+ask)*100:50;
+ let score=0, reasons=[];
+ if(p>ma25){score+=15;reasons.push('1H price > MA25')} else reasons.push('1H price below MA25');
+ if(ma7>ma25){score+=10;reasons.push('1H MA7 > MA25')}
+ if(p>ma254){score+=10;reasons.push('4H price > MA25')}
+ if(ma74>ma254){score+=10;reasons.push('4H MA7 > MA25')}
+ if(r>=50&&r<=68){score+=10;reasons.push('1H RSI healthy')} else if(r>70){score-=6;reasons.push('RSI overbought')}
+ if(r4>=50&&r4<=70){score+=8;reasons.push('4H RSI supportive')}
+ if(vr>=1.3){score+=10;reasons.push('volume expansion')}
+ if(bp>=55){score+=8;reasons.push('taker buyers dominant')}
+ if(imb>=55){score+=7;reasons.push('order-book bid imbalance')}
+ if(p<ma25&&r<45){score-=8;reasons.push('bearish momentum')}
+ return {s,p,r,r4,ma7,ma25,vr,bp,imb,score,reasons};
+}
+async function runScanner(){
+ const out=document.getElementById('scannerGrid'),st=document.getElementById('scannerStatus'); out.innerHTML=''; st.textContent='Binance market universe তৈরি হচ্ছে…';
+ try{
+   const uni=await getEligibleBreakoutUniverse(true); const symbols=uni.slice(0,80).map(x=>x.symbol);
+   st.textContent=`${symbols.length}টি liquid pair scan হচ্ছে…`;
+   const arr=await mapWithConcurrency(symbols,6,async s=>{try{return await scannerData(s)}catch(e){return null}},(d,t)=>st.textContent=`${d}/${t} pair বিশ্লেষণ চলছে…`);
+   const min=+document.getElementById('scannerMin').value; const ok=arr.filter(x=>x&&x.score>=min).sort((a,b)=>b.score-a.score);
+   out.innerHTML=ok.length?ok.map(x=>`<div class="v3card"><div><b>${esc(x.s)}</b> <span class="v3pill ${x.score>=80?'v3bull':x.score>=60?'v3neutral':'v3bear'}">${x.score}/100</span></div><div class="v3score">${x.score}</div><div class="scorebar"><div class="scorefill" style="width:${x.score}%"></div></div><div class="v3small">Price $${x.p}<br>RSI 1H ${x.r.toFixed(1)} · RSI 4H ${x.r4.toFixed(1)}<br>Volume ${x.vr.toFixed(2)}x · Taker buy ${x.bp.toFixed(0)}% · Bid ${x.imb.toFixed(0)}%</div><hr><div class="v3small">${x.reasons.map(r=>'• '+esc(r)).join('<br>')}</div></div>`).join(''):'<div class="v3card">এই threshold-এ qualifying setup পাওয়া যায়নি।</div>';
+   st.textContent=`${ok.length}টি setup পাওয়া গেছে · ${symbols.length}টি market pair scan · ${new Date().toLocaleTimeString('bn-BD')}`;
+ }catch(e){st.textContent='Market scan ব্যর্থ — Binance API/Network আবার চেষ্টা করুন।';}
+}
+function breakoutCardHTML(x){
+ const cls=x.status==='strong'?'strong':(x.status==='fake'?'fake':'');
+ const badge=x.status==='strong'?'🟢 REAL BREAKOUT':x.status==='fake'?'🔴 FAKE BREAKOUT RISK':'🟡 WATCH';
+ return `<div class="breakoutCard ${cls}">
+   <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><b style="font-size:17px">${esc(x.s)}</b><div class="v3small">${badge}</div></div><div class="breakoutScore">${x.score}</div></div>
+   <div class="scorebar"><div class="scorefill" style="width:${x.score}%;background:${x.status==='fake'?'var(--red)':'var(--green)'}"></div></div>
+   <div class="metricGrid">
+    <div class="metric">Resistance<b>$${x.resistance.toFixed(x.resistance<1?6:4)}</b></div>
+    <div class="metric">Price<b>$${x.price.toFixed(x.price<1?6:4)}</b></div>
+    <div class="metric">Break distance<b>${x.breakPct>=0?'+':''}${x.breakPct.toFixed(2)}%</b></div>
+    <div class="metric">Volume<b>${x.volRatio.toFixed(2)}×</b></div>
+    <div class="metric">Taker buy<b>${x.takerBuy.toFixed(0)}%</b></div>
+    <div class="metric">Bid side<b>${x.bidPct.toFixed(0)}%</b></div>
+   </div>
+   <div class="reasonList">${x.reasons.map(r=>'• '+esc(r)).join('<br>')}</div>
+   <div class="levels" style="margin-top:10px"><div class="lv"><span class="k">Entry zone</span><span class="v">$${x.entry.toFixed(x.entry<1?6:4)}</span></div><div class="lv"><span class="k">Stop-loss</span><span class="v" style="color:var(--red)">$${x.sl.toFixed(x.sl<1?6:4)}</span></div><div class="lv"><span class="k">TP1</span><span class="v">$${x.tp1.toFixed(x.tp1<1?6:4)}</span></div><div class="lv"><span class="k">R:R</span><span class="v">1 : ${x.rr.toFixed(2)}</span></div></div>
+   <div class="v3small" style="margin-top:9px">BTC confirmation: ${x.btcConfirm?'✅':'❌'} · Retest: ${x.retest?'✅':'⚪'} · Fake-risk: ${x.fakeRisk}%</div>
+ </div>`;
+}
+async function getEligibleBreakoutUniverse(deep=false){
+ const all=await fetchAllTickers();
+ const minVol=deep?300000:1000000;
+ return all.filter(t=>{
+   const q=Number(t.quoteVolume)||0;
+   return t.symbol.endsWith('USDT') && !STABLE_OR_LEVERAGED.test(t.symbol) && q>=minVol && t.symbol!=='USDTUSDT';
+ }).sort((a,b)=>(Number(b.quoteVolume)||0)-(Number(a.quoteVolume)||0)).slice(0,deep?120:45);
+}
+
+async function mapWithConcurrency(items,limit,worker,onProgress){
+ const out=new Array(items.length); let next=0,done=0;
+ async function runner(){
+   while(true){const i=next++; if(i>=items.length)return; try{out[i]=await worker(items[i],i);}catch(e){out[i]=null;} done++; if(onProgress)onProgress(done,items.length);}
+ }
+ await Promise.all(Array.from({length:Math.min(limit,items.length)},runner));
+ return out;
+}
+
+async function breakoutMarketData(ticker,tf,btcCandles,deep=false){
+ const s=ticker.symbol;
+ const candles=await fetchKlines(s,tf,deep?90:65);
+ if(candles.length<35) throw new Error('not enough candles');
+ const price=Number(ticker.lastPrice), closed=candles.slice(0,-1);
+ const lookback=closed.slice(-(deep?60:40));
+ const resistance=Math.max(...lookback.slice(0,-1).map(x=>x.high));
+ const last=closed.at(-1), prev=closed.at(-2);
+ const prior=closed.slice(-21,-1), recent=closed.slice(-4);
+ const priorVol=prior.reduce((a,x)=>a+x.quoteVol,0)/(prior.length||1);
+ const recentVol=recent.reduce((a,x)=>a+x.quoteVol,0)/(recent.length||1);
+ const volRatio=priorVol?recentVol/priorVol:1;
+ const buyQ=recent.reduce((a,x)=>a+x.takerBuyQuoteVol,0), totalQ=recent.reduce((a,x)=>a+x.quoteVol,0);
+ const takerBuy=totalQ?buyQ/totalQ*100:50;
+ const lastRsi=rsi(closed.map(x=>x.close),14)||50;
+ const bodyBreak=last.close>resistance;
+ const currentAbove=price>resistance;
+ const breakPct=(price/resistance-1)*100;
+ const retest=(bodyBreak||currentAbove) && (last.low<=resistance*1.008 || prev.low<=resistance*1.008) && price>resistance;
+ const wickFail=last.high>resistance*1.002 && last.close<resistance;
+ const btcCl=btcCandles.slice(0,-1).map(x=>x.close), btcMa=sma(btcCl,25), btcRsi=rsi(btcCl,14)||50;
+ const btcConfirm=!!btcMa && btcCl.at(-1)>btcMa && btcRsi>=48;
+ const fakeRisk=Math.min(95,Math.max(5,Math.round((wickFail?38:8)+(volRatio<1.15?22:0)+(takerBuy<49?18:0)+(price<resistance?18:0)+(btcConfirm?0:7)+(lastRsi>76?10:0))));
+ let score=0,reasons=[];
+ if(bodyBreak){score+=27;reasons.push('শেষ closed candle resistance-এর ওপরে close');}
+ else if(currentAbove){score+=18;reasons.push('বর্তমান price resistance-এর ওপরে');}
+ else if(price>=resistance*.995){score+=10;reasons.push('resistance-এর খুব কাছে');}
+ else reasons.push('resistance এখনো ভাঙেনি');
+ if(volRatio>=2.0){score+=22;reasons.push(`volume expansion ${volRatio.toFixed(2)}×`);}
+ else if(volRatio>=1.35){score+=16;reasons.push(`ভালো volume support ${volRatio.toFixed(2)}×`);}
+ else if(volRatio>=1.1){score+=8;reasons.push(`সামান্য volume expansion ${volRatio.toFixed(2)}×`);}
+ else reasons.push(`volume দুর্বল ${volRatio.toFixed(2)}×`);
+ if(takerBuy>=58){score+=18;reasons.push(`aggressive buyer ${takerBuy.toFixed(0)}%`);}
+ else if(takerBuy>=52){score+=11;reasons.push(`buyer pressure ${takerBuy.toFixed(0)}%`);}
+ else reasons.push(`seller pressure বেশি (${takerBuy.toFixed(0)}% buyer)`);
+ if(retest){score+=10;reasons.push('breakout level retest/hold');}
+ if(btcConfirm){score+=8;reasons.push('BTC একই timeframe-এ supportive');}else reasons.push('BTC confirmation দুর্বল');
+ if(lastRsi>=50&&lastRsi<=72){score+=5;reasons.push(`RSI ${lastRsi.toFixed(1)} healthy zone`);}
+ if(wickFail){score=Math.max(0,score-12);reasons.push('উপরের wick কিন্তু close resistance-এর নিচে — fake-risk');}
+ const status=score>=70&&bodyBreak&&volRatio>=1.35&&takerBuy>=52?'strong':(fakeRisk>=60?'fake':'watch');
+ const slBase=Math.min(resistance*.992,prev.low);
+ const sl=Math.min(slBase,entrySafe(price,resistance)*.995);
+ const entry=bodyBreak?Math.max(resistance,price*.998):Math.max(resistance,price);
+ const risk=Math.max(entry-sl,entry*.005);
+ const tp1=entry+risk*2, rr=(tp1-entry)/risk;
+ return {s,price,resistance,breakPct,volRatio,takerBuy,bidPct:50,btcConfirm,retest,fakeRisk,score,status,reasons,entry,sl,tp1,rr,rsi:lastRsi,quoteVolume:Number(ticker.quoteVolume)||0};
+}
+function entrySafe(price,resistance){return Math.max(price,resistance);}
+
+function breakoutCardHTML(x){
+ const badge=x.status==='strong'?'🟢 REAL BREAKOUT':x.status==='fake'?'🔴 FAKE BREAKOUT RISK':'🟡 BREAKOUT WATCH';
+ const cls=x.status==='strong'?'strong':x.status==='fake'?'fake':'watch';
+ const fmt=v=>'$'+Number(v).toLocaleString('en-US',{maximumFractionDigits:v<1?8:4});
+ return `<div class="breakoutCard ${cls}">
+   <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><b style="font-size:17px">${esc(x.s)}</b><div class="v3small">${badge}</div></div><div class="breakoutScore">${x.score}</div></div>
+   <div class="scorebar"><div class="scorefill" style="width:${x.score}%;background:${x.status==='fake'?'var(--red)':'var(--green)'}"></div></div>
+   <div class="metricGrid">
+    <div class="metric">Resistance<b>${fmt(x.resistance)}</b></div><div class="metric">Price<b>${fmt(x.price)}</b></div><div class="metric">Break distance<b>${x.breakPct>=0?'+':''}${x.breakPct.toFixed(2)}%</b></div>
+    <div class="metric">Volume<b>${x.volRatio.toFixed(2)}×</b></div><div class="metric">Taker buy<b>${x.takerBuy.toFixed(0)}%</b></div><div class="metric">RSI<b>${x.rsi.toFixed(1)}</b></div>
+   </div>
+   <div class="reasonList">${x.reasons.map(r=>'• '+esc(r)).join('<br>')}</div>
+   <div class="levels" style="margin-top:10px"><div class="lv"><span class="k">Entry zone</span><span class="v">${fmt(x.entry)}</span></div><div class="lv"><span class="k">Stop-loss</span><span class="v" style="color:var(--red)">${fmt(x.sl)}</span></div><div class="lv"><span class="k">TP1</span><span class="v">${fmt(x.tp1)}</span></div><div class="lv"><span class="k">R:R</span><span class="v">1 : ${x.rr.toFixed(2)}</span></div></div>
+   <div class="v3small" style="margin-top:9px">BTC confirmation: ${x.btcConfirm?'✅':'❌'} · Retest: ${x.retest?'✅':'⚪'} · Fake-risk: ${x.fakeRisk}% · 24h volume: ${(x.quoteVolume/1e6).toFixed(1)}M USDT</div>
+ </div>`;
+}
+
+async function runBreakout(deep=false){
+ const out=document.getElementById('breakoutGrid'),st=document.getElementById('breakoutStatus');
+ const progress=document.getElementById('breakoutProgress');
+ const universeEl=document.getElementById('breakoutUniverse'),scannedEl=document.getElementById('breakoutScanned'),updatedEl=document.getElementById('breakoutUpdated');
+ const tf=document.getElementById('breakoutTf').value, minScore=Number(document.getElementById('breakoutMin').value), mode=document.getElementById('breakoutMode').value;
+ out.innerHTML='';progress.style.width='0%';st.textContent='Market universe তৈরি হচ্ছে…';
+ document.getElementById('breakoutBtn').disabled=true;document.getElementById('breakoutDeepBtn').disabled=true;
+ try{
+   const universe=await getEligibleBreakoutUniverse(deep);
+   universeEl.textContent=`Universe: ${universe.length} liquid USDT pairs`;
+   scannedEl.textContent='Scanned: 0';
+   const btcCandles=await fetchKlines('BTCUSDT',tf,90);
+   const results=await mapWithConcurrency(universe,6,async(t)=>{
+     const x=await breakoutMarketData(t,tf,btcCandles,deep);
+     return x;
+   },(done,total)=>{progress.style.width=(done/total*100).toFixed(1)+'%';scannedEl.textContent=`Scanned: ${done}/${total}`;st.textContent=`${done}/${total} pair বিশ্লেষণ চলছে…`});
+   let ok=results.filter(Boolean).filter(x=>x.score>=minScore);
+   if(mode==='strong') ok=ok.filter(x=>x.status==='strong');
+   if(mode==='fake') ok=ok.filter(x=>x.status==='fake');
+   ok.sort((a,b)=>b.score-a.score);
+   // Order-book confirmation only for the strongest 12 setups to keep the scan fast and rate-limit friendly.
+   const top=ok.slice(0,12);
+   await mapWithConcurrency(top,3,async x=>{try{const ob=await fetchOrderBook(x.s,100);const bid=ob.bids.reduce((a,b)=>a+b.price*b.qty,0),ask=ob.asks.reduce((a,b)=>a+b.price*b.qty,0);x.bidPct=bid+ask?bid/(bid+ask)*100:50;if(x.bidPct>=55)x.score=Math.min(100,x.score+5);else if(x.bidPct<45)x.score=Math.max(0,x.score-5);return x;}catch(e){return x;}});
+   ok.sort((a,b)=>b.score-a.score);
+   out.innerHTML=ok.length?ok.map(breakoutCardHTML).join(''):'<div class="heroEmpty"><div class="big">🔎</div><b style="font-size:16px;color:var(--text)">এই scan-এ threshold পূরণ করা setup পাওয়া যায়নি</b><div style="margin-top:6px">Score threshold কমিয়ে আবার scan করতে পারো।</div></div>';
+   updatedEl.textContent='Last scan: '+new Date().toLocaleTimeString('bn-BD');
+   st.textContent=`${ok.length}টি qualifying setup · ${universe.length}টি pair scan · ${tf}`;
+ }catch(e){st.textContent='Scan ব্যর্থ হয়েছে — Binance API/Network আবার চেষ্টা করুন।';out.innerHTML='<div class="warn">Breakout scan-এর market data পাওয়া যায়নি।</div>'}
+ finally{document.getElementById('breakoutBtn').disabled=false;document.getElementById('breakoutDeepBtn').disabled=false;}
+}
+async function runFlow(){
+ const o=document.getElementById('flowOut'),st=document.getElementById('flowStatus'),limit=+(document.getElementById('flowLimit')?.value||20); o.innerHTML=''; st.textContent='Liquid market scan হচ্ছে…';
+ try{
+  const uni=await getEligibleBreakoutUniverse(false), symbols=uni.slice(0,Math.min(limit,uni.length)).map(x=>x.symbol);
+  const rows=await mapWithConcurrency(symbols,5,async s=>{try{const [t,c,ob]=await Promise.all([fetchTicker(s),fetchKlines(s,'1m',60),fetchOrderBook(s,100)]);const p=+t.lastPrice,q=c.reduce((a,x)=>a+x.quoteVol,0),b=c.reduce((a,x)=>a+x.takerBuyQuoteVol,0),bp=q?b/q*100:50,prev=c.slice(0,30).reduce((a,x)=>a+x.quoteVol,0)/30,now=c.slice(-10).reduce((a,x)=>a+x.quoteVol,0)/10,vr=prev?now/prev:1,bid=ob.bids.reduce((a,x)=>a+x.price*x.qty,0),ask=ob.asks.reduce((a,x)=>a+x.price*x.qty,0),imb=bid+ask?bid/(bid+ask)*100:50;return {s,p,bp,vr,imb,score:Math.round((bp-50)*1.2+Math.max(0,vr-1)*18+(imb-50)*.6)}}catch(e){return null}},(d,t)=>st.textContent=`${d}/${t} pair flow বিশ্লেষণ চলছে…`);
+  rows.filter(Boolean).sort((a,b)=>b.score-a.score); const ok=rows.filter(Boolean).sort((a,b)=>b.score-a.score);
+  o.innerHTML=ok.map((x,i)=>`<div class="v3card"><div><b>#${i+1} ${x.s}</b> <span class="v3pill ${x.bp>=55?'v3bull':'v3bear'}">${x.bp>=55?'Buyer':'Seller'} pressure</span></div><div class="v3grid"><div>Taker Buy<br><b>${x.bp.toFixed(1)}%</b></div><div>Volume ratio<br><b>${x.vr.toFixed(2)}×</b></div><div>Bid imbalance<br><b>${x.imb.toFixed(1)}%</b></div></div></div>`).join('')||'<div class="v3card">কোনো flow data পাওয়া যায়নি।</div>';
+  st.textContent=`${ok.length}টি liquid pair analyzed · ${new Date().toLocaleTimeString('bn-BD')}`;
+ }catch(e){st.textContent='Flow scan ব্যর্থ হয়েছে।';}
+}
+
+const FUND_CACHE={markets:null, details:new Map()};
+async function fetchCoinGeckoMarkets(){
+  if(FUND_CACHE.markets && Date.now()-FUND_CACHE.markets.ts<10*60*1000) return FUND_CACHE.markets.data;
+  let all=[];
+  for(let page=1;page<=3;page++){
+    const u=`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=${page}&sparkline=false&price_change_percentage=24h`;
+    const r=await fetch(u); if(!r.ok) throw new Error('CoinGecko markets '+r.status); const d=await r.json(); all=all.concat(d);
+    if(d.length<250) break;
+  }
+  FUND_CACHE.markets={data:all,ts:Date.now()}; return all;
+}
+async function fetchCoinGeckoDetail(id){
+  if(FUND_CACHE.details.has(id)) return FUND_CACHE.details.get(id);
+  const u=`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(id)}?localization=false&tickers=false&market_data=true&community_data=true&developer_data=true&sparkline=false`;
+  const r=await fetch(u); if(!r.ok) throw new Error('CoinGecko detail '+r.status); const d=await r.json(); FUND_CACHE.details.set(id,d); return d;
+}
+function fundamentalScore(m,d){
+  const md=d?.market_data||{}; const cap=Number(md.market_cap?.usd||m.market_cap||0); const fdv=Number(md.fully_diluted_valuation?.usd||m.fully_diluted_valuation||0); const circ=Number(md.circulating_supply||m.circulating_supply||0); const max=Number(md.max_supply||m.max_supply||0); const rank=Number(m.market_cap_rank||d?.market_cap_rank||9999);
+  let score=0, reasons=[], risks=[];
+  if(rank<=50){score+=15;reasons.push('Market-cap rank ≤50');} else if(rank<=150){score+=12;reasons.push('Market-cap rank ≤150');} else if(rank<=300){score+=8;reasons.push('Market-cap rank ≤300');} else if(rank<=700){score+=4;}
+  const mcFdv=cap>0&&fdv>0?cap/fdv:null;
+  if(mcFdv===null){score+=3;reasons.push('FDV data unavailable / N/A');} else if(mcFdv>=0.8){score+=18;reasons.push(`Circulating/FDV ≈ ${(mcFdv*100).toFixed(0)}%`);} else if(mcFdv>=0.6){score+=13;reasons.push(`Circulating/FDV ≈ ${(mcFdv*100).toFixed(0)}%`);} else if(mcFdv>=0.4){score+=8;reasons.push(`Circulating/FDV ≈ ${(mcFdv*100).toFixed(0)}%`);} else {score+=2;risks.push('Low circulating/FDV ratio — dilution risk');}
+  const dev=Number(d?.developer_score); const comm=Number(d?.community_score); const pub=Number(d?.public_interest_score);
+  if(Number.isFinite(dev)&&dev>0){if(dev>=7){score+=14;reasons.push(`Developer score ${dev.toFixed(1)}/10`);}else if(dev>=4){score+=9;reasons.push(`Developer score ${dev.toFixed(1)}/10`);}else{score+=4;risks.push(`Low developer score ${dev.toFixed(1)}/10`);}} else risks.push('Developer score unavailable');
+  if(Number.isFinite(comm)&&comm>0){if(comm>=7){score+=7;reasons.push(`Community score ${comm.toFixed(1)}/10`);}else if(comm>=4){score+=4;}}
+  if(Number.isFinite(pub)&&pub>0&&pub>=7){score+=4;reasons.push(`Public interest score ${pub.toFixed(1)}/10`);}
+  const sentiment=Number(d?.sentiment_votes_up_percentage); if(Number.isFinite(sentiment)&&sentiment>=55){score+=4;reasons.push(`Positive sentiment ${sentiment.toFixed(0)}%`);} else if(Number.isFinite(sentiment)&&sentiment<40){risks.push(`Weak sentiment ${sentiment.toFixed(0)}%`);}
+  const vol=Number(md.total_volume?.usd||m.total_volume||0); const liq=cap>0&&vol>0?vol/cap*100:null;
+  if(liq!==null){if(liq>=2&&liq<=50){score+=8;reasons.push(`24h volume/market cap ${liq.toFixed(1)}%`);}else if(liq>50){score+=4;risks.push('Very high turnover — speculation/volatility risk');}else risks.push('Low market turnover');}
+  if(Array.isArray(d?.categories)&&d.categories.length){score+=4;reasons.push('Project category/sector identified');}
+  if(d?.links?.homepage?.some(Boolean)){score+=3;reasons.push('Official homepage linked');}
+  if(max>0&&circ>0&&circ/max<0.5) risks.push(`Max-supply dilution: only ${(circ/max*100).toFixed(0)}% circulating`);
+  if(fdv>0&&cap>0&&fdv/cap>=3) risks.push(`FDV is ${(fdv/cap).toFixed(1)}× market cap`);
+  if(rank>1000) risks.push('Very low market-cap rank');
+  score=Math.max(0,Math.min(100,Math.round(score)));
+  return {score,reasons,risks,rank,cap,fdv,circ,max,dev,comm,pub,sentiment,liq,mcFdv};
+}
+function fundamentalCard(x){
+  const q=x.score>=75?'strong':x.score>=60?'watch':'weak';
+  const label=q==='strong'?'🟢 Strong fundamental':q==='watch'?'🟡 Research further':'🔴 High risk / weak data';
+  const money=n=>n>=1e12?`${(n/1e12).toFixed(2)}T`:n>=1e9?`${(n/1e9).toFixed(2)}B`:n>=1e6?`${(n/1e6).toFixed(1)}M`:'—';
+  return `<div class="breakoutCard ${q==='strong'?'strong':q==='weak'?'fake':'watch'}">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><b style="font-size:17px">${esc(x.symbol)}</b><div class="v3small">${label} · Rank #${x.rank||'—'}</div></div><div class="breakoutScore">${x.score}</div></div>
+    <div class="scorebar"><div class="scorefill" style="width:${x.score}%"></div></div>
+    <div class="metricGrid">
+      <div class="metric">Market cap<b>$${money(x.cap)}</b></div><div class="metric">FDV<b>$${money(x.fdv)}</b></div><div class="metric">Circ./FDV<b>${x.mcFdv==null?'—':(x.mcFdv*100).toFixed(0)+'%'}</b></div>
+      <div class="metric">Developer<b>${Number.isFinite(x.dev)&&x.dev>0?x.dev.toFixed(1)+'/10':'N/A'}</b></div><div class="metric">Community<b>${Number.isFinite(x.comm)&&x.comm>0?x.comm.toFixed(1)+'/10':'N/A'}</b></div><div class="metric">24h turnover<b>${x.liq==null?'—':x.liq.toFixed(1)+'%'}</b></div>
+    </div>
+    <div class="reasonList"><b style="color:var(--text)">Positive signals</b><br>${x.reasons.length?x.reasons.slice(0,6).map(r=>'• '+esc(r)).join('<br>'):'• Limited public data'}</div>
+    <div class="reasonList" style="margin-top:7px"><b style="color:var(--red)">Risk flags</b><br>${x.risks.length?x.risks.slice(0,5).map(r=>'• '+esc(r)).join('<br>'):'• No major rule-based flag found'}</div>
+    <div class="v3small" style="margin-top:10px">Fundamental score is a screening score, not a valuation or buy recommendation.</div>
+  </div>`;
+}
+async function runFundamental(){
+ const out=document.getElementById('fundamentalGrid'),st=document.getElementById('fundamentalStatus'),prog=document.getElementById('fundamentalProgress');
+ const uniEl=document.getElementById('fundamentalUniverse'),scEl=document.getElementById('fundamentalScanned'),upEl=document.getElementById('fundamentalUpdated');
+ const count=Number(document.getElementById('fundamentalCount').value),min=Number(document.getElementById('fundamentalMin').value);
+ const btn=document.getElementById('fundamentalBtn'); btn.disabled=true; out.innerHTML=''; prog.style.width='0%';
+ st.textContent='Binance market data + public fundamental metadata সংগ্রহ করা হচ্ছে…';
+ try{
+   const binance=await fetchAllTickers();
+   const candidates=binance
+     .filter(t=>t.symbol.endsWith('USDT')&&!STABLE_OR_LEVERAGED.test(t.symbol)&&Number(t.quoteVolume)>=1000000&&t.symbol!=='USDTUSDT')
+     .sort((a,b)=>Number(b.quoteVolume)-Number(a.quoteVolume)).slice(0,80);
+   uniEl.textContent=`Universe: ${candidates.length} liquid USDT pairs`;
+   scEl.textContent='Analyzed: 0';
+
+   let markets=[];
+   try{ markets=await fetchCoinGeckoMarkets(); }catch(e){
+     markets=[];
+     st.textContent='CoinGecko unavailable — Binance-only fallback দিয়ে screening করা হচ্ছে…';
+   }
+   const bySym=new Map();
+   markets.forEach(m=>{
+     const k=String(m.symbol||'').toUpperCase();
+     if(k&&!bySym.has(k)) bySym.set(k,m);
+   });
+
+   const chosen=candidates.slice(0,Math.max(count*3,24));
+   const rows=[];
+   for(let i=0;i<chosen.length;i++){
+     const t=chosen[i];
+     try{
+       const base=t.symbol.replace(/USDT$/,'').toUpperCase();
+       const meta=bySym.get(base);
+       let f;
+       if(meta){
+         f=fundamentalScore(meta,meta);
+         f.source='CoinGecko market data + Binance liquidity';
+         f.dataQuality='Public market metadata available';
+       }else{
+         const q=Number(t.quoteVolume||0), ch=Number(t.priceChangePercent||0);
+         // Conservative fallback: never pretend Binance-only data is full fundamental research.
+         let score=22;
+         if(q>=100e6) score+=14; else if(q>=25e6) score+=10; else if(q>=5e6) score+=6;
+         if(Math.abs(ch)<15) score+=4;
+         f={score,rank:null,cap:0,fdv:0,circ:0,max:0,dev:NaN,comm:NaN,pub:NaN,sentiment:NaN,liq:null,mcFdv:null,
+            reasons:['High Binance spot liquidity'],risks:['CoinGecko project metadata not matched','Usage/developer/tokenomics not verified'],
+            source:'Binance fallback only',dataQuality:'Limited — verify manually'};
+       }
+       rows.push({...f,symbol:t.symbol,name:meta?.name||base,binanceVolume:qSafe(t.quoteVolume),price:Number(t.lastPrice||0),change:Number(t.priceChangePercent||0)});
+     }catch(e){}
+     const done=i+1; prog.style.width=(done/chosen.length*100).toFixed(1)+'%'; scEl.textContent=`Analyzed: ${done}/${chosen.length}`;
+     if(done%8===0) st.textContent=`${done}/${chosen.length} coin-এর fundamental screening চলছে…`;
+   }
+   rows.sort((a,b)=>b.score-a.score);
+   const ok=rows.filter(x=>x.score>=min).slice(0,count);
+   out.innerHTML=ok.length?ok.map(fundamentalCard).join(''):'<div class="heroEmpty"><div class="big">🔬</div><b style="font-size:16px;color:var(--text)">এই threshold-এ result পাওয়া যায়নি</b><div style="margin-top:6px">Score threshold কমিয়ে আবার scan করো।</div></div>';
+   upEl.textContent='Last scan: '+new Date().toLocaleTimeString('bn-BD');
+   st.textContent=`${ok.length}টি result · ${markets.length?'CoinGecko + Binance':'Binance fallback'} · ${new Date().toLocaleTimeString('bn-BD')}`;
+ }catch(e){
+   console.error(e); st.textContent='Fundamental scan ব্যর্থ হয়েছে।';
+   out.innerHTML='<div class="warn">Public market data পাওয়া যায়নি। Internet/API connection যাচাই করে আবার Scan চাপুন।</div>';
+ } finally{btn.disabled=false;}
+}
+function qSafe(v){const n=Number(v||0);return Number.isFinite(n)?n:0;}
+document.getElementById('fundamentalBtn').onclick=runFundamental;
+
+async function loadFundamentalCoinOptions(){
+ const sel=document.getElementById('fundamentalCoinSelect');
+ try{
+   const all=await fetchAllTickers();
+   const list=all.filter(t=>t.symbol.endsWith('USDT')&&!STABLE_OR_LEVERAGED.test(t.symbol)&&Number(t.quoteVolume)>=1000000)
+     .sort((a,b)=>Number(b.quoteVolume)-Number(a.quoteVolume)).slice(0,200).map(t=>t.symbol).sort();
+   sel.innerHTML='<option value="">কয়েন বেছে নিন…</option>'+list.map(s=>`<option value="${s}">${s}</option>`).join('');
+ }catch(e){ sel.innerHTML='<option value="">কয়েন লোড হয়নি</option>'; }
+}
+async function runManualFundamental(){
+ const sel=document.getElementById('fundamentalCoinSelect'), inp=document.getElementById('fundamentalCoinInput'), out=document.getElementById('fundamentalManual');
+ let sym=(inp.value.trim()||sel.value||'').toUpperCase().replace(/\s+/g,'');
+ if(sym && !sym.endsWith('USDT')) sym += 'USDT';
+ if(!sym){out.innerHTML='<div class="warn">একটি coin নির্বাচন করুন বা BTC/USDT-এর মতো pair লিখুন।</div>';return;}
+ out.innerHTML='<div class="info">🔬 '+esc(sym)+'-এর গভীর Fundamental verification চলছে… Binance + CoinGecko project data যাচাই করা হচ্ছে।</div>';
+ try{
+   const base=sym.replace(/USDT$/,'').toUpperCase();
+   const tickers=await fetchTicker(sym);
+   let markets=await fetchCoinGeckoMarkets().catch(()=>[]);
+   let meta=markets.find(m=>String(m.symbol||'').toUpperCase()===base);
+   if(!meta){
+     const search=await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(base)}`);
+     if(search.ok){const sd=await search.json(); const hit=(sd.coins||[]).find(c=>String(c.symbol||'').toUpperCase()===base); if(hit){try{meta=await fetchCoinGeckoDetail(hit.id);}catch(e){}}}
+   }
+   if(!meta){
+     out.innerHTML=`<div class="warn"><b>${esc(sym)}</b>-এর project metadata নির্ভরযোগ্যভাবে match করা যায়নি। Binance-only data দিয়ে full fundamental verdict দেওয়া হবে না।</div>`;
+     return;
+   }
+   const id=meta.id || meta.coin_id;
+   let detail=meta;
+   if(id && !meta.description && !meta.links){ try{ detail=await fetchCoinGeckoDetail(id); }catch(e){} }
+   const marketMeta=markets.find(m=>m.id===id) || meta;
+   const f=fundamentalScore(marketMeta,detail);
+   const md=detail.market_data||{};
+   const desc=String(detail.description?.en||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+   const links=detail.links||{};
+   const homepage=(links.homepage||[]).find(Boolean);
+   const github=(links.repos_url?.github||[]).find(Boolean);
+   const chains=Object.keys(detail.platforms||{}).filter(Boolean);
+   const categories=(detail.categories||[]).filter(Boolean).slice(0,8);
+   const ath=Number(md.ath?.usd||0), price=Number(tickers.lastPrice||md.current_price?.usd||0);
+   const fromAth=ath>0&&price>0?(price/ath-1)*100:null;
+   const circ=Number(md.circulating_supply||0), max=Number(md.max_supply||0), total=Number(md.total_supply||0);
+   const unlockNote=max>0&&circ>0?`Circulating supply ${(circ/max*100).toFixed(1)}% of max supply`:'Max supply data unavailable';
+   const projectUse=detail.description?.en ? 'Project description available for manual use-case review' : 'Project use-case description unavailable';
+   const usageRisk='Active users / on-chain transactions / real revenue সরাসরি এই scanner-এ যাচাই করা হয়নি';
+   const teamNote='Team identity / transparency আলাদা primary-source verification প্রয়োজন';
+   const tokenNote=f.risks.some(x=>x.toLowerCase().includes('dilution'))?'⚠️ Dilution / unlock risk নজরে রাখুন':'Supply dilution signal এখন পরিষ্কারভাবে negative নয়';
+   const verdict=f.score>=75?'🟢 Strong Fundamental Profile':f.score>=60?'🟡 Moderate / Research Further':'🔴 Weak / High Risk Profile';
+   const cls=f.score>=75?'genuine':f.score>=60?'hype':'sell';
+   out.innerHTML=`
+   <div class="v3card ${cls}">
+    <div class="trendHead"><span class="trendSym">${esc(sym)}</span><span class="trendVerdict ${cls}">${verdict}</span></div>
+    <div class="v3grid" style="margin-top:10px">
+      <div>Fundamental Score<br><b style="font-size:22px">${Math.round(f.score)}/100</b></div>
+      <div>Market Rank<br><b>${f.rank?('#'+f.rank):'N/A'}</b></div>
+      <div>Binance 24h Volume<br><b>$${fmtMoney(qSafe(tickers.quoteVolume),'')}</b></div>
+      <div>24h Change<br><b>${Number(tickers.priceChangePercent||0)>=0?'+':''}${Number(tickers.priceChangePercent||0).toFixed(2)}%</b></div>
+    </div>
+    <div class="v3small" style="margin-top:10px"><b>1. Project / Use Case</b><br>${esc(desc?desc.slice(0,700):projectUse)}${desc.length>700?'…':''}</div>
+    <div class="v3small" style="margin-top:8px"><b>2. Tokenomics</b><br>Market Cap: $${fmtMoney(Number(md.market_cap?.usd||0),'')} · FDV: $${fmtMoney(Number(md.fully_diluted_valuation?.usd||0),'')}<br>Circulating: ${fmtMoney(circ,'')} · Total: ${fmtMoney(total,'')} · ${unlockNote}<br>${tokenNote}</div>
+    <div class="v3small" style="margin-top:8px"><b>3. Development / Team / Transparency</b><br>Developer signal: ${Number.isFinite(Number(detail.developer_score))?Number(detail.developer_score).toFixed(1)+'/10':'Unavailable'} · ${teamNote}<br>${github?`GitHub: <a href="${esc(github)}" target="_blank">repository</a>`:'GitHub link unavailable'}</div>
+    <div class="v3small" style="margin-top:8px"><b>4. Community / Market Interest</b><br>Community score: ${Number.isFinite(Number(detail.community_score))?Number(detail.community_score).toFixed(1)+'/10':'Unavailable'} · Public interest: ${Number.isFinite(Number(detail.public_interest_score))?Number(detail.public_interest_score).toFixed(1)+'/10':'Unavailable'}<br>Sentiment: ${Number.isFinite(Number(detail.sentiment_votes_up_percentage))?Number(detail.sentiment_votes_up_percentage).toFixed(0)+'% positive':'Unavailable'}</div>
+    <div class="v3small" style="margin-top:8px"><b>5. Real Usage Verification</b><br>⚠️ ${usageRisk}. Integrations, users, transactions and revenue-এর জন্য official docs / explorers / project dashboards দিয়ে আলাদা যাচাই দরকার।</div>
+    <div class="v3small" style="margin-top:8px"><b>6. Ecosystem</b><br>${chains.length?`Networks/platforms: ${chains.slice(0,10).join(', ')}`:'Platform data unavailable'}${categories.length?`<br>Categories: ${categories.join(', ')}`:''}</div>
+    <div class="v3small" style="margin-top:8px"><b>7. Valuation / Price Context</b><br>Current: $${price?price.toPrecision(8):'N/A'}${fromAth!==null?` · ATH থেকে ${fromAth.toFixed(1)}% নিচে`:''}</div>
+    <div style="margin-top:10px"><b>✅ Strengths</b><ul>${(f.reasons||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>কোনো শক্তিশালী automated factor পাওয়া যায়নি</li>'}</ul></div>
+    <div><b>⚠️ Risks / What to verify</b><ul>${(f.risks||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>Manual primary-source verification still required</li>'}<li>${esc(usageRisk)}</li><li>${esc(teamNote)}</li></ul></div>
+    <div class="v3small" style="margin-top:8px">${homepage?`🌐 Official site: <a href="${esc(homepage)}" target="_blank">open</a> · `:''}Data: CoinGecko + Binance · এই score investment guarantee নয়।</div>
+   </div>`;
+ }catch(e){console.error(e);out.innerHTML='<div class="warn">Fundamental verification ব্যর্থ হয়েছে। Coin symbol, Binance pair এবং Internet/API connection যাচাই করে আবার চেষ্টা করুন।</div>';}
+}
+document.getElementById('fundamentalAddBtn').onclick=runManualFundamental;
+loadFundamentalCoinOptions();
+
+async function fetchFuturesJSON(url){
+ const r=await fetch(url); if(!r.ok) throw new Error('futures api '+r.status); return r.json();
+}
+function normalizeFuturesSymbol(v){let x=String(v||'').toUpperCase().replace(/\s+/g,'');if(x&&!x.endsWith('USDT'))x+='USDT';return x;}
+async function loadFuturesCoinOptions(){
+ const sel=document.getElementById('futuresCoinSelect');
+ try{
+  const all=await fetchAllTickers();
+  const list=all.filter(t=>t.symbol.endsWith('USDT')&&!STABLE_OR_LEVERAGED.test(t.symbol)&&Number(t.quoteVolume)>=20000000)
+   .sort((a,b)=>Number(b.quoteVolume)-Number(a.quoteVolume)).slice(0,80).map(t=>t.symbol);
+  sel.innerHTML=list.map((x,i)=>`<option value="${x}">${x}</option>`).join('');
+ }catch(e){/* keep current option */}
+}
+function fmtPct(x){return Number.isFinite(x)?((x>=0?'+':'')+x.toFixed(4)+'%'):'N/A'}
+async function runFuturesIntel(){
+ const sel=document.getElementById('futuresCoinSelect'),inp=document.getElementById('futuresCoinInput'),out=document.getElementById('futuresOut'),st=document.getElementById('futuresStatus');
+ const sym=normalizeFuturesSymbol(inp.value.trim()||sel.value); if(!sym){out.innerHTML='<div class="warn">একটি Futures symbol নির্বাচন করুন।</div>';return;}
+ inp.value=sym; st.textContent='Loading…'; out.innerHTML='<div class="info">'+esc(sym)+' Futures data সংগ্রহ করা হচ্ছে…</div>';
+ try{
+  const base='https://fapi.binance.com';
+  const [mark,oi,fr,ls,spot]=await Promise.all([
+   fetchFuturesJSON(base+'/fapi/v1/premiumIndex?symbol='+encodeURIComponent(sym)),
+   fetchFuturesJSON(base+'/fapi/v1/openInterest?symbol='+encodeURIComponent(sym)),
+   fetchFuturesJSON(base+'/fapi/v1/fundingRate?symbol='+encodeURIComponent(sym)+'&limit=1'),
+   fetchFuturesJSON(base+'/futures/data/globalLongShortAccountRatio?symbol='+encodeURIComponent(sym)+'&period=5m&limit=1'),
+   fetchTicker(sym)
+  ]);
+  const markPrice=Number(mark.markPrice||0), spotPrice=Number(spot.lastPrice||0), basis=spotPrice>0?(markPrice/spotPrice-1)*100:null;
+  const funding=Number(mark.lastFundingRate ?? fr?.[0]?.fundingRate);
+  const oiVal=Number(oi.openInterest||0), ratio=Number(ls?.[0]?.longShortRatio);
+  const longPct=ratio>0?(ratio/(1+ratio))*100:null, shortPct=longPct!=null?100-longPct:null;
+  let pressure='🟡 Mixed / Neutral', pressureCls='hold';
+  if(Number.isFinite(funding) && funding>0.0005 && Number.isFinite(ratio) && ratio>1.15){pressure='🔴 Long crowded';pressureCls='sell';}
+  else if(Number.isFinite(funding) && funding<-0.0005 && Number.isFinite(ratio) && ratio<0.87){pressure='🟢 Short crowded';pressureCls='genuine';}
+  else if(Number.isFinite(funding) && funding>0.0002){pressure='🟠 Long bias';pressureCls='hype';}
+  else if(Number.isFinite(funding) && funding<-0.0002){pressure='🟢 Short bias';pressureCls='genuine';}
+  out.innerHTML=`<div class="v3card ${pressureCls}">
+   <div class="trendHead"><span class="trendSym">${esc(sym)}</span><span class="trendVerdict ${pressureCls}">${pressure}</span></div>
+   <div class="v3grid" style="margin-top:10px">
+    <div>Mark Price<br><b>$${markPrice?markPrice.toPrecision(10):'N/A'}</b></div>
+    <div>Spot Price<br><b>$${spotPrice?spotPrice.toPrecision(10):'N/A'}</b></div>
+    <div>Basis<br><b>${fmtPct(basis)}</b></div>
+    <div>Funding Rate<br><b>${Number.isFinite(funding)?fmtPct(funding*100):'N/A'}</b></div>
+    <div>Open Interest<br><b>${oiVal?oiVal.toLocaleString():'N/A'} ${esc(sym.replace('USDT',''))}</b></div>
+    <div>Long / Short<br><b>${Number.isFinite(ratio)?ratio.toFixed(2):'N/A'}</b></div>
+   </div>
+   <div class="v3small" style="margin-top:10px">${longPct!=null?`Accounts estimate: 🟢 Long ${longPct.toFixed(1)}% · 🔴 Short ${shortPct.toFixed(1)}%`:''}</div>
+   <div style="margin-top:10px"><b>কী বোঝাচ্ছে?</b><ul>
+    <li>${funding>0?'Positive funding → longs short-দের funding দিচ্ছে; negative হলে উল্টো।':'Funding এখন প্রায় neutral/negative।'}</li>
+    <li>${ratio>1.15?'Long positioning তুলনামূলক বেশি crowded।':ratio<0.87?'Short positioning তুলনামূলক বেশি crowded।':'Long/short positioning খুব একপেশে নয়।'}</li>
+    <li>${basis!=null?(basis>0.2?'Futures spot-এর premium-এ চলছে।':basis<-0.2?'Futures spot-এর discount-এ চলছে।':'Futures-spot basis ছোট।'):'Basis পাওয়া যায়নি।'}</li>
+   </ul></div>
+   <div class="warn" style="margin-top:10px">এই Futures panel-এর ফলাফল Spot-এর buy/sell signal বা Confluence Score-এ যোগ করা হয়নি। এটি শুধু leverage market context।</div>
+  </div>`;
+  document.getElementById('futuresUpdated').textContent='Last check: '+new Date().toLocaleTimeString('bn-BD'); st.textContent='Ready';
+ }catch(e){console.error(e);st.textContent='Failed';out.innerHTML='<div class="warn">Futures data পাওয়া যায়নি। Symbolটি Binance Futures-এ listed কি না এবং Internet/API access ঠিক আছে কি না যাচাই করুন।</div>';}
+}
+document.getElementById('futuresAnalyzeBtn').onclick=runFuturesIntel;
+document.getElementById('futuresReloadBtn').onclick=loadFuturesCoinOptions;
+loadFuturesCoinOptions();
+
+async function runRegime(){
+ const o=document.getElementById('regimeOut');o.innerHTML='<div class="info">BTC/ETH market data বিশ্লেষণ…</div>';
+ try{const syms=['BTCUSDT','ETHUSDT'];const ds=await Promise.all(syms.map(s=>fetchKlines(s,'4h',60)));let bull=0,bear=0;const rows=ds.map((c,i)=>{const cl=c.map(x=>x.close),m7=sma(cl,7),m25=sma(cl,25),r=rsi(cl);if(m7>m25&&cl.at(-1)>m25)bull++;if(m7<m25&&cl.at(-1)<m25)bear++;return `${syms[i]}: price ${cl.at(-1)>m25?'above':'below'} MA25 · RSI ${r.toFixed(1)}`});const regime=bull===2?'🟢 Bullish':bear===2?'🔴 Bearish':'🟡 Mixed / Range';o.innerHTML=`<div class="v3card"><h3>${regime}</h3><div class="v3small">${rows.join('<br>')}</div><p>Regime filter-কে setup scanner-এর confirmation হিসেবে ব্যবহার করো; একে standalone buy/sell signal হিসেবে নয়।</p></div>`}catch(e){o.innerHTML='<div class="warn">Market regime data পাওয়া যায়নি।</div>'}}
+function renderJournal(){const o=document.getElementById('journalOut');if(!V3.journal.length){o.innerHTML='<div class="v3card">এখনও কোনো trade save করা হয়নি।</div>';return}o.innerHTML='<table class="v3table"><tr><th>Coin</th><th>Entry</th><th>SL</th><th>TP</th><th>Risk</th><th></th></tr>'+V3.journal.map((x,i)=>`<tr><td>${esc(x.coin)}</td><td>${esc(x.entry)}</td><td>${esc(x.sl)}</td><td>${esc(x.tp)}</td><td>${esc(x.risk)}%</td><td><button class="miniBtn" onclick="delJournal(${i})">✕</button></td></tr>`).join('')+'</table>'}
+window.delJournal=i=>{V3.journal.splice(i,1);localStorage.setItem('v3_journal',JSON.stringify(V3.journal));renderJournal()};
+document.getElementById('jAdd').onclick=()=>{V3.journal.unshift({coin:document.getElementById('jCoin').value,entry:document.getElementById('jEntry').value,sl:document.getElementById('jSL').value,tp:document.getElementById('jTP').value,risk:document.getElementById('jRisk').value});localStorage.setItem('v3_journal',JSON.stringify(V3.journal));renderJournal()};
+async function runBacktest(){const tf=document.getElementById('btTf').value,lim=Math.min(1000,Math.max(100,+document.getElementById('btLimit').value||500)),count=+(document.getElementById('btCount')?.value||10),o=document.getElementById('btOut');o.innerHTML='<div class="info">Market থেকে top liquid pairs নিয়ে historical test চলছে…</div>';try{const uni=await getEligibleBreakoutUniverse(false),symbols=uni.slice(0,count).map(x=>x.symbol);const rows=await mapWithConcurrency(symbols,4,async s=>{try{const c=await fetchKlines(s,tf,lim),cl=c.map(x=>x.close);let trades=0,wins=0,pnl=0;for(let i=30;i<c.length-3;i++){const hist=cl.slice(0,i),m=sma(hist,25),r=rsi(hist);if(cl[i]>m&&r<68){trades++;const entry=cl[i],sl=entry*.98,tp=entry*1.04;let outcome=null;for(let j=i+1;j<Math.min(i+4,c.length);j++){if(c[j].low<=sl){outcome=-2;break}if(c[j].high>=tp){outcome=4;break}}if(outcome==null)outcome=(cl[Math.min(i+3,c.length-1)]/entry-1)*100;pnl+=outcome;if(outcome>0)wins++}}return{s,trades,wr:trades?wins/trades*100:0,pnl}}catch(e){return null}});o.innerHTML='<div class="v3grid">'+rows.filter(Boolean).map(x=>`<div class="v3card"><h3>${x.s}</h3><div class="v3grid"><div>Trades<br><b>${x.trades}</b></div><div>Win rate<br><b>${x.wr.toFixed(1)}%</b></div><div>Raw P/L<br><b class="${x.pnl>=0?'v3good':'v3danger'}">${x.pnl.toFixed(2)}%</b></div></div></div>`).join('')+'</div><p class="v3small">Baseline: price > MA25 + RSI < 68; target +4%, stop -2%, max 3 candles hold. Fees/slippage are not included.</p>'}catch(e){o.innerHTML='<div class="warn">Backtest market data পাওয়া যায়নি।</div>'}}
+
+function earlySwingLows(closes){
+  const lows=[];
+  for(let i=2;i<closes.length-2;i++){
+    if(closes[i] <= closes[i-1] && closes[i] <= closes[i+1] && closes[i] <= closes[i-2] && closes[i] <= closes[i+2]) lows.push({i,p:closes[i]});
+  }
+  return lows;
+}
+
+function earlyATR(candles, period=14){
+  if(candles.length<period+1) return null;
+  const tr=[];
+  for(let i=1;i<candles.length;i++){
+    const prev=candles[i-1].close;
+    tr.push(Math.max(candles[i].high-candles[i].low,Math.abs(candles[i].high-prev),Math.abs(candles[i].low-prev)));
+  }
+  return sma(tr.slice(-period),period);
+}
+
+function earlyOpportunityData(ticker,candles,btcCandles,btcTicker,regime){
+  const closed=candles.slice(0,-1);
+  if(closed.length<45) return null;
+  const closes=closed.map(x=>x.close);
+  const price=Number(ticker.lastPrice)||closes.at(-1);
+  const lows=earlySwingLows(closes);
+  if(lows.length<2) return null;
+
+  const a=lows.at(-2), b=lows.at(-1);
+  const higherLow=b.p>a.p*1.003;
+  const lastLowAge=closed.length-1-b.i;
+  const recentWindow=closed.slice(-12);
+  const recentHigh=Math.max(...recentWindow.map(x=>x.high));
+  const resistance=Math.max(...closed.slice(-28,-1).map(x=>x.high));
+  const resistanceDist=(resistance>0?(resistance-price)/price*100:99);
+
+  const atrNow=earlyATR(closed.slice(-20),14);
+  const atrBase=earlyATR(closed.slice(-45,-15),14);
+  const compression=!!atrNow&&!!atrBase&&atrNow/atrBase<=0.82;
+  const rangeNow=(Math.max(...recentWindow.map(x=>x.high))-Math.min(...recentWindow.map(x=>x.low)))/price*100;
+  const rangeBase=(Math.max(...closed.slice(-30,-12).map(x=>x.high))-Math.min(...closed.slice(-30,-12).map(x=>x.low)))/price*100;
+  const rangeCompression=rangeBase>0&&rangeNow/rangeBase<=0.72;
+  const compressed=compression||rangeCompression;
+
+  const vRecent=closed.slice(-5).reduce((a,x)=>a+x.quoteVol,0)/5;
+  const vPrior=closed.slice(-20,-5).reduce((a,x)=>a+x.quoteVol,0)/15;
+  const volumeBuild=vPrior>0?vRecent/vPrior:1;
+  const volumeBuilding=volumeBuild>=1.12;
+
+  const r=rsi(closes,14)||50;
+  const ma7=sma(closes,7),ma25=sma(closes,25);
+  const trendSupport=ma7>=ma25&&price>=ma25*.985;
+
+  const ch24=Number(ticker.priceChangePercent)||0;
+  const pump4h=closed.length>=5?(closes.at(-1)/closes.at(-5)-1)*100:0;
+  const notPumped=ch24<=8&&pump4h<=5&&ch24>-12;
+
+  const btcCl=btcCandles.slice(0,-1).map(x=>x.close);
+  const btc24=Number(btcTicker?.priceChangePercent)||0;
+  const coin4h=closed.length>=5?(closes.at(-1)/closes.at(-5)-1)*100:0;
+  const btc4h=btcCl.length>=5?(btcCl.at(-1)/btcCl.at(-5)-1)*100:0;
+  const relativeStrength=coin4h-btc4h;
+  const btcStrong=relativeStrength>=1.0;
+
+  const regimeCompatible=regime==='bull'?trendSupport:
+    regime==='mixed'?(trendSupport&&r>=45):
+    false;
+
+  const nearResistance=resistanceDist>=0&&resistanceDist<=4.0&&price<=resistance*1.006;
+  const healthyRsi=r>=45&&r<=68;
+
+  // Hard gates: Early Opportunity must be a pre-breakout setup, not an already-pumped/broken setup.
+  const clean = higherLow && compressed && volumeBuilding && btcStrong && nearResistance && healthyRsi && notPumped && regimeCompatible;
+  // The expression above intentionally keeps trendSupport as a requirement through regimeCompatible.
+  const hardFailReasons=[];
+  if(!higherLow) hardFailReasons.push('Higher Low পরিষ্কার নয়');
+  if(!compressed) hardFailReasons.push('Compression দুর্বল');
+  if(!volumeBuilding) hardFailReasons.push('Volume build নেই');
+  if(!btcStrong) hardFailReasons.push('BTC-এর তুলনায় শক্তি কম');
+  if(!nearResistance) hardFailReasons.push('Resistance থেকে দূরে/ইতিমধ্যে break');
+  if(!healthyRsi) hardFailReasons.push(`RSI ${r.toFixed(1)} — healthy zone নয়`);
+  if(!notPumped) hardFailReasons.push('ইতিমধ্যে বড় pump হয়েছে');
+  if(!regimeCompatible) hardFailReasons.push('Market regime compatible নয়');
+
+  let score=0;
+  if(higherLow) score+=18;
+  if(compressed) score+=17;
+  if(volumeBuild>=1.35) score+=14; else if(volumeBuild>=1.12) score+=10;
+  if(relativeStrength>=3) score+=16; else if(relativeStrength>=1) score+=11;
+  if(resistanceDist>=0&&resistanceDist<=1.5) score+=15;
+  else if(resistanceDist<=2.5) score+=12;
+  else if(resistanceDist<=4) score+=8;
+  if(healthyRsi) score+=10;
+  if(notPumped) score+=5;
+  if(regimeCompatible) score+=5;
+  if(trendSupport) score+=3;
+
+  const structurePct=(b.p/a.p-1)*100;
+  const compressionRatio=atrBase?atrNow/atrBase:null;
+  return {
+    symbol:ticker.symbol,price,rsi:r,score:Math.min(100,score),
+    higherLow,structurePct,compressed,compressionRatio,rangeCompression,
+    volumeBuild,relativeStrength,resistance,resistanceDist,
+    change24h:ch24,pump4h,notPumped,regimeCompatible,trendSupport,
+    clean,hardFailReasons,regime,lastLowAge
+  };
+}
+
+function earlyCardHTML(x){
+  const quality=x.score>=80?'v3bull':x.score>=70?'v3neutral':'v3bear';
+  const reasons=[
+    `Higher Low: ${x.higherLow?'✅':'❌'}${x.higherLow?' · +'+x.structurePct.toFixed(1)+'%':''}`,
+    `Compression: ${x.compressed?'✅':'❌'}${x.compressionRatio?` · ATR ${x.compressionRatio.toFixed(2)}×`:''}`,
+    `Volume build: ${x.volumeBuild>=1.12?'✅':'❌'} · ${x.volumeBuild.toFixed(2)}×`,
+    `BTC-relative: ${x.relativeStrength>=1?'✅':'❌'} · ${x.relativeStrength>=0?'+':''}${x.relativeStrength.toFixed(2)}%`,
+    `Resistance: ${x.resistanceDist.toFixed(2)}% দূরে`,
+    `RSI: ${x.rsi.toFixed(1)} · ${x.rsi>=45&&x.rsi<=68?'healthy':'not ideal'}`
+  ];
+  return `<div class="v3card">
+    <div class="trendHead"><span class="trendSym">${esc(x.symbol)}</span><span class="v3pill ${quality}">${Math.round(x.score)}/100</span></div>
+    <div class="chg up" style="margin-top:4px">$${Number(x.price).toPrecision(7)} · 24H ${x.change24h>=0?'+':''}${x.change24h.toFixed(2)}%</div>
+    <div class="scorebar"><div class="scorefill" style="width:${x.score}%"></div></div>
+    <div class="reasonList">${reasons.map(r=>`<div>• ${r}</div>`).join('')}</div>
+    <div class="v3small" style="margin-top:9px"><b>Regime:</b> ${x.regime==='bull'?'Risk-on / Bullish':x.regime==='mixed'?'Mixed / Selective':'Risk-off'} · <b>Pre-breakout:</b> ${x.notPumped?'Yes':'No'}</div>
+    <div class="row" style="margin-top:9px">
+      <button class="miniBtn commandResearch" data-symbol="${esc(x.symbol)}" data-jump="breakout">🚨 Confirm Breakout</button>
+      <button class="miniBtn commandResearch" data-symbol="${esc(x.symbol)}" data-jump="fundamental">🔬 Fundamental</button>
+    </div>
+  </div>`;
+}
+
+let earlyNotifyEnabled=localStorage.getItem('earlyNotifyEnabled')==='1';
+let earlyNotifyTimer=null;
+let earlyScanRunning=false;
+const EARLY_ALERT_COOLDOWN_MS=4*60*60*1000;
+
+function earlyNotificationSupported(){
+  return 'Notification' in window && window.isSecureContext;
+}
+
+function setEarlyNotifyUI(){
+  const btn=document.getElementById('earlyNotifyBtn');
+  const dot=document.getElementById('earlyNotifyDot');
+  const st=document.getElementById('earlyNotifyStatus');
+  if(!btn||!dot||!st) return;
+  const supported=earlyNotificationSupported();
+  if(!supported){
+    btn.textContent='🔔 Notifications: HTTPS দরকার';
+    btn.disabled=false;
+    btn.className='notifyOff';
+    dot.classList.remove('on');
+    st.textContent='Local file নয় — HTTPS link থেকে খুলুন';
+    return;
+  }
+  if(earlyNotifyEnabled && Notification.permission==='granted'){
+    btn.textContent='🔔 Alerts ON'; btn.className='notifyOn'; dot.classList.add('on'); st.textContent='Browser alert চালু';
+  }else{
+    btn.textContent='🔕 Alerts OFF'; btn.className='notifyOff'; dot.classList.remove('on'); st.textContent=Notification.permission==='denied'?'Browser permission blocked':'Browser alert বন্ধ';
+  }
+}
+
+function earlyNotifyKey(symbol){ return 'earlyAlert:'+symbol; }
+
+function shouldEarlyNotify(x){
+  const key=earlyNotifyKey(x.symbol);
+  const last=Number(localStorage.getItem(key)||0);
+  return Date.now()-last>=EARLY_ALERT_COOLDOWN_MS;
+}
+
+function sendEarlyBrowserNotification(clean){
+  if(!earlyNotifyEnabled || !earlyNotificationSupported() || Notification.permission!=='granted' || !clean.length) return;
+  const fresh=clean.filter(shouldEarlyNotify);
+  if(!fresh.length) return;
+  fresh.slice(0,3).forEach(x=>{
+    const title=`🎯 Early Opportunity: ${x.symbol}`;
+    const body=`Score ${Math.round(x.score)}/100 · RSI ${x.rsi.toFixed(1)} · Resistance ${x.resistanceDist.toFixed(2)}% দূরে · BTC-relative +${x.relativeStrength.toFixed(2)}%`;
+    try{
+      const n=new Notification(title,{body,tag:'early-'+x.symbol,renotify:false});
+      n.onclick=()=>{window.focus();document.querySelector('[data-tab="early"]')?.click();};
+    }catch(e){}
+    localStorage.setItem(earlyNotifyKey(x.symbol),String(Date.now()));
+  });
+}
+
+function stopEarlyAutoScan(){
+  if(earlyNotifyTimer){clearInterval(earlyNotifyTimer);earlyNotifyTimer=null;}
+}
+
+function startEarlyAutoScan(){
+  stopEarlyAutoScan();
+  if(!earlyNotifyEnabled) return;
+  const mins=Math.max(5,Number(document.getElementById('earlyInterval')?.value||10));
+  // Keep scanning while the dashboard page remains open in Chrome.
+  // Background tabs can be throttled by Android/Chrome, so we also trigger
+  // a fresh scan when the tab becomes visible/focused again.
+  earlyNotifyTimer=setInterval(()=>{
+    if(!earlyNotifyEnabled) return;
+    runEarlyOpportunity(true);
+  },mins*60*1000);
+}
+
+// If Chrome temporarily throttles/suspends a background tab, scan immediately
+// when the dashboard becomes visible or receives focus again.
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden && earlyNotifyEnabled) setTimeout(()=>runEarlyOpportunity(true),500);
+});
+window.addEventListener('focus',()=>{
+  if(earlyNotifyEnabled) setTimeout(()=>runEarlyOpportunity(true),500);
+});
+
+async function toggleEarlyNotifications(){
+  if(!earlyNotificationSupported()){
+    alert('এই HTML file-টি এখন content:///local file হিসেবে খোলা আছে। Chrome notification চালাতে এটিকে HTTPS website (যেমন GitHub Pages) হিসেবে খুলতে হবে।');
+    setEarlyNotifyUI();
+    return;
+  }
+  if(Notification.permission==='denied'){
+    alert('Chrome notification permission Blocked আছে। Chrome Site settings থেকে Notifications Allow করে আবার চেষ্টা করুন।');
+    setEarlyNotifyUI();
+    return;
+  }
+  if(Notification.permission!=='granted'){
+    const permission=await Notification.requestPermission();
+    if(permission!=='granted'){earlyNotifyEnabled=false;localStorage.setItem('earlyNotifyEnabled','0');setEarlyNotifyUI();return;}
+  }
+  earlyNotifyEnabled=!earlyNotifyEnabled;
+  localStorage.setItem('earlyNotifyEnabled',earlyNotifyEnabled?'1':'0');
+  setEarlyNotifyUI();
+  if(earlyNotifyEnabled){
+    startEarlyAutoScan();
+    runEarlyOpportunity(true);
+  }else stopEarlyAutoScan();
+}
+
+function testEarlyNotification(){
+  if(!earlyNotificationSupported()){alert('Browser notification এখানে supported নয়।');return;}
+  if(Notification.permission!=='granted'){alert('আগে Alerts ON করুন।');return;}
+  new Notification('🔔 Early Opportunity Alerts',{body:'Browser notification ঠিকমতো কাজ করছে। Clean setup পেলে এখানেই alert আসবে।',tag:'early-test'});
+}
+
+async function runEarlyOpportunity(isAuto=false){
+  if(earlyScanRunning) return;
+  earlyScanRunning=true;
+  const grid=document.getElementById('earlyGrid'), empty=document.getElementById('earlyEmpty'), market=document.getElementById('earlyMarket');
+  const progress=document.getElementById('earlyProgress'), uniEl=document.getElementById('earlyUniverse'), scannedEl=document.getElementById('earlyScanned'), status=document.getElementById('earlyStatus');
+  grid.innerHTML=''; empty.classList.add('hiddenAll'); market.innerHTML='<div class="info">BTC regime ও market universe হিসাব করা হচ্ছে…</div>';
+  progress.style.width='0%'; status.textContent='Scanning…';
+  try{
+    const all=await fetchAllTickers();
+    const btcTicker=all.find(t=>t.symbol==='BTCUSDT');
+    const uni=all.filter(t=>t.symbol.endsWith('USDT')&&!STABLE_OR_LEVERAGED.test(t.symbol)&&Number(t.quoteVolume)>5000000)
+      .sort((a,b)=>Number(b.quoteVolume)-Number(a.quoteVolume)).slice(0,45);
+    const btcCandles=await fetchKlines('BTCUSDT','1h',80);
+    const bcl=btcCandles.slice(0,-1).map(x=>x.close), bm7=sma(bcl,7), bm25=sma(bcl,25), brsi=rsi(bcl,14)||50;
+    const bull=bm7>bm25&&bcl.at(-1)>bm25&&brsi<72;
+    const bear=bm7<bm25&&bcl.at(-1)<bm25;
+    const regime=bull?'bull':bear?'bear':'mixed';
+    market.innerHTML=`<div class="v3card"><b>Market Regime</b><div style="font-size:20px;margin-top:5px">${regime==='bull'?'🟢 Risk-on / Bullish':regime==='bear'?'🔴 Risk-off / Bearish':'🟡 Mixed / Selective'}</div><div class="v3small">BTC 1H · RSI ${brsi.toFixed(1)} · ${bcl.at(-1)>bm25?'above':'below'} MA25</div></div>
+      <div class="v3card"><b>Early Opportunity Rule</b><div style="font-size:20px;margin-top:5px">Pre-breakout only</div><div class="v3small">Big pump, weak BTC-relative strength, দূরের resistance বা unhealthy RSI হলে candidate বাদ।</div></div>`;
+    uniEl.textContent=`Universe: ${uni.length}`;
+    const arr=await mapWithConcurrency(uni,5,async t=>{
+      try{return earlyOpportunityData(t,await fetchKlines(t.symbol,'1h',70),btcCandles,btcTicker,regime)}catch(e){return null}
+    },(d,total)=>{scannedEl.textContent=`Scanned: ${d}/${total}`;progress.style.width=(d/total*100)+'%';});
+    const min=+document.getElementById('earlyMin').value;
+    const count=+document.getElementById('earlyCount').value;
+    const clean=arr.filter(x=>x&&x.clean&&x.score>=min).sort((a,b)=>b.score-a.score).slice(0,count);
+    if(!clean.length){empty.classList.remove('hiddenAll');status.textContent='No clean setup';}
+    else{grid.innerHTML=clean.map(earlyCardHTML).join('');status.textContent=`${clean.length}টি clean early setup`; }
+    if(isAuto || earlyNotifyEnabled) sendEarlyBrowserNotification(clean);
+    document.getElementById('earlyUpdated').textContent='Last scan: '+new Date().toLocaleTimeString('bn-BD');
+  }catch(e){
+    console.error(e); status.textContent='Failed'; market.innerHTML='<div class="warn">Early Opportunity scan-এর market data পাওয়া যায়নি। Internet/API connection যাচাই করুন।</div>';
+  } finally {
+    earlyScanRunning=false;
+  }
+}
+
+document.getElementById('earlyBtn').onclick=()=>runEarlyOpportunity(false);
+document.getElementById('earlyMin').onchange=()=>runEarlyOpportunity(false);
+document.getElementById('earlyCount').onchange=()=>runEarlyOpportunity(false);
+document.getElementById('earlyNotifyBtn').onclick=toggleEarlyNotifications;
+document.getElementById('earlyTestNotifyBtn').onclick=testEarlyNotification;
+document.getElementById('earlyInterval').onchange=()=>{if(earlyNotifyEnabled) startEarlyAutoScan();};
+setEarlyNotifyUI();
+if(earlyNotifyEnabled && Notification.permission==='granted') startEarlyAutoScan();
+document.getElementById('scannerBtn').onclick=runScanner;document.getElementById('flowBtn').onclick=runFlow;document.getElementById('breakoutBtn').onclick=()=>runBreakout(false);document.getElementById('breakoutDeepBtn').onclick=()=>runBreakout(true);document.getElementById('regimeBtn').onclick=runRegime;document.getElementById('btBtn').onclick=runBacktest;
+setTimeout(()=>{renderJournal()},500);
+</script>
+</body>
+</html>
